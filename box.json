@@ -1,0 +1,14 @@
+{
+    "directories": [
+        "vendor/composer",
+        "vendor/slim/slim/Slim",
+        "vendor/illuminate",
+        "vendor/php-console/php-console/src",
+        "vendor/philo/laravel-blade/src",
+        "src"
+    ],
+    "files": ["vendor/autoload.php"],
+    "main": "vendor/autoload.php",
+    "output": "beatrix.phar",
+    "stub": true
+}
