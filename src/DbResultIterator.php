@@ -41,13 +41,11 @@ class DbResultIterator implements Iterator, Countable {
 	}
 
 	public function valid() {
-		return ($this->key+1) < $this->count();
+		return $this->key < $this->count();
 	}
 
 	public function rewind() {
-//		if(!is_null($this->current)){
-//			throw new \BadMethodCallException("Cannot rewind forward-only result");
-//		}
+		return null;
 	}
 
 	public function count() {
