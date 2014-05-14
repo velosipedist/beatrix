@@ -3,6 +3,8 @@ namespace beatrix {
 
 	use Illuminate\Container\Container;
 	use Philo\Blade\Blade;
+	use PhpConsole\Connector;
+	use PhpConsole\Helper;
 	use Slim\Slim;
 
 	/**
@@ -11,9 +13,20 @@ namespace beatrix {
 	 * @property Container $ioc
 	 * @property Blade $blade
 	 * @property BladeView $view
+	 * @property Connector $console
 	 */
 	class Beatrix extends Slim
 	{
+		public function __construct(array $userSettings = array()) {
+			parent::__construct($userSettings);
+
+			Helper::register();
+			// register debugger
+			$this->container->singleton('console', function(){
+				return Connector::getInstance();
+			});
+		}
+
 		/**
 		 * @return \Beatrix
 		 */
@@ -26,6 +39,7 @@ namespace beatrix {
 		 * @param $path
 		 */
 		public function addViewsDir($path) {
+			//todo priority
 			// Default view
 			$this->view->addTemplatesDirectory($path);
 			return $this;
