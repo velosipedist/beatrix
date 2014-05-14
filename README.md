@@ -96,6 +96,8 @@ blade('iblock-list', ['items' => $iterator]);
 `is_ajax()` does current http request sent by AJAX. Useful in Bitrix templates conditions
 (set in PHP condition of empty template, to render "plain" app response).
 
+`slimUrl()` url to named route with path params + query params appending support
+
 And finally, all Illuminate/Support sweet helpers (`array_pluck`, `str_finish` etc).
 
 ## Is it all?
