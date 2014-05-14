@@ -66,6 +66,9 @@ namespace beatrix {
 			if(is_null($name)){
 				$name = $this->router->getCurrentRoute()->getName();
 			}
+			$routeParams = $this->router->getCurrentRoute()->getParams();
+			$params = array_merge($routeParams, $params);
+
 			$queryParamsAdd = parse_url($this->request->getUrl(), PHP_URL_QUERY);
 			if ($queryParamsAdd) {
 				$queryParamsAdd = [parse_str($queryParamsAdd)];
@@ -85,14 +88,20 @@ namespace beatrix {
 }
 
 namespace {
-	use beatrix\BladeView;
 
 	/**
 	 * @see Beatrix
 	 */
 	class Beatrix extends \beatrix\Beatrix
 	{
-
+		/**
+		 * @param array $settings
+		 * @return \Beatrix
+		 * @see Slim::__construct()
+		 */
+		public static function paperbag($settings = array()) {
+			return new \Beatrix($settings);
+		}
 	}
 }
  
