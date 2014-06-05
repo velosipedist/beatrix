@@ -1,10 +1,15 @@
 <?php
 namespace beatrix;
+use beatrix\iblock\ElementsResult;
+use beatrix\iblock\SectionsResult;
+use beatrix\iblock\URL;
 use Countable;
 use Iterator;
 
+\CModule::IncludeModule('iblock');
+
 class DbResultIterator implements Iterator, Countable {
-	/** @var \CDBResult */
+	/** @var \CDBResult | \CSearch | \CIBlockResult | ElementsResult | SectionsResult */
 	private $result;
 	/** @var array */
 	private $current;
@@ -21,7 +26,9 @@ class DbResultIterator implements Iterator, Countable {
 	public function __construct($result, $pageSize = 20, $pageUrlParam = 'nav_page', $textHtmlAuto = true, $useTilda = true) {
 		\CPageOption::SetOptionString("main", "nav_page_in_session", "N");
 		$this->result = $result;
-		$this->result->NavStart($pageSize, true, isset($_GET[$pageUrlParam]) ? (int) $_GET[$pageUrlParam] : false);
+		if (!$this->result->bNavStart) {
+			$this->result->NavStart($pageSize, true, isset($_GET[$pageUrlParam]) ? (int)$_GET[$pageUrlParam] : false);
+		}
 		$this->textHtmlAuto = $textHtmlAuto;
 		$this->useTilda = $useTilda;
 		$this->key = 0;
@@ -30,8 +37,8 @@ class DbResultIterator implements Iterator, Countable {
 		$this->pageUrlParam = $pageUrlParam;
 	}
 
-	public static function from($result) {
-		return new static($result);
+	public static function from($result, $pageSize = 20, $pageUrlParam = 'nav_page', $textHtmlAuto = true, $useTilda = true) {
+		return new static($result, $pageSize, $pageUrlParam, $textHtmlAuto, $useTilda);
 	}
 
 	public function current() {
@@ -56,7 +63,10 @@ class DbResultIterator implements Iterator, Countable {
 	}
 
 	public function count() {
-		return $this->result->SelectedRowsCount();
+		return count($this->result->arResult);
+	}
+	public function totalCount() {
+		return (int) $this->result->SelectedRowsCount();
 	}
 
 	/**
@@ -66,15 +76,16 @@ class DbResultIterator implements Iterator, Countable {
 		if($this->result->NavPageCount < 2) {
 			return;
 		}
-		$url = parse_url($_SERVER['REQUEST_URI']);
-		$params = $url['query'] ? parse_str($url['query']) : array();
 		//todo parametrize placeholder ?
-		$params[$this->pageUrlParam] = '__PAGENUMBER__';
-
-		$urlTemplate = $url['path'].'?'.http_build_query($params);
-		$urlStartTemplate = $url['path'];
+		$params = array($this->pageUrlParam => '__PAGENUMBER__');
+		$queryString = URL::extendQueryParams($params);
+		$urlTemplate = $_SERVER['PATH_INFO'] . ($queryString ? '?' . $queryString : '');
+		$paramsCurrent = array();
+		parse_str($_SERVER['QUERY_STRING'], $paramsCurrent);
+		unset($paramsCurrent[$this->pageUrlParam]);
+		$urlStartTemplate = $_SERVER['PATH_INFO'].($paramsCurrent ? '?'.http_build_query($paramsCurrent) : '');
 		$result = $this->result;
-		unset($url, $params);
+		unset($url, $params, $paramsCurrent);
 
 		// get passed options
 		extract($variables);
@@ -90,15 +101,43 @@ class DbResultIterator implements Iterator, Countable {
 	}
 
 	private function fetchCurrent() {
-		$this->current = $this->result->GetNext($this->textHtmlAuto, $this->useTilda);
+		// special, street magic for extract properties
+		if ($this->result instanceof ElementsResult) {
+			$elem = $this->result->GetNextElement($this->textHtmlAuto, $this->useTilda);
+			if(!$elem){
+				$this->current = array();
+				return;
+			}
+			$elemData = $elem->GetFields();
+			if ($elem instanceof \_CIBElement) {
+				$elemData['PROPERTIES'] = $elem->GetProperties();
+				foreach ($elemData['PROPERTIES'] as $code => $prop) {
+					$elemData['PROPERTY_' . strtoupper($code) . '_VALUE'] = $prop['VALUE'];
+				}
+			}
+
+			$this->current = $elemData;
+		} else {
+			$this->current = $this->result->GetNext($this->textHtmlAuto, $this->useTilda);
+		}
 	}
 
-	public function toArray() {
+	/**
+	 * @return array
+	 */
+	public function toArray($keyField = null) {
 		if($this->key == 0){
-			return iterator_to_array($this);
+			if($keyField){
+				$array = array();
+				foreach ($this as $item) {
+					$array[$item[$keyField]] = $item;
+				}
+			} else {
+				$array = iterator_to_array($this);
+			}
+			return $array;
 		} else {
 			throw new \BadMethodCallException("Data already fetched");
 		}
 	}
 }
- 

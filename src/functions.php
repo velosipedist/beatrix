@@ -13,7 +13,7 @@ function slimUrl($name, $params = array(), $queryParams = array()) {
  * @internal param array $mergeData
  */
 function blade($view, $data = array(), $return = false) {
-	$view = \beatrix\Beatrix::app()->view->blade($view, $data);
+	$view = Beatrix::app()->view->blade($view, $data);
 	if ($return) {
 		return $view;
 	} else {

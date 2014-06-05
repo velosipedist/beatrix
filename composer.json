@@ -17,7 +17,8 @@
         "illuminate/container":"4.1.*",
         "illuminate/view": "4.1.*",
         "philo/laravel-blade": "dev-master",
-        "php-console/php-console": "3.*"
+        "php-console/php-console": "3.*",
+        "symfony/console": "2.4.*"
     },
     "require-dev":{
         "phing/phing": "2.6.*",
@@ -29,6 +30,6 @@
             "beatrix\\": "src",
             "beatrix\\tests\\": "tests"
         },
-        "files": ["src/Beatrix.php", "src/functions.php"]
+        "files": ["src/Application.php", "src/functions.php"]
     }
 }

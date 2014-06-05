@@ -1,6 +1,8 @@
 <?php
 namespace beatrix {
 
+	use beatrix\iblock\URL;
+	use beatrix\middlewares\AfterApiMethod;
 	use Illuminate\Container\Container;
 	use Philo\Blade\Blade;
 	use PhpConsole\Connector;
@@ -15,7 +17,7 @@ namespace beatrix {
 	 * @property BladeView $view
 	 * @property Connector $console
 	 */
-	class Beatrix extends Slim
+	class Application extends Slim
 	{
 		public function __construct(array $userSettings = array()) {
 			parent::__construct($userSettings);
@@ -24,6 +26,26 @@ namespace beatrix {
 			// register debugger
 			$this->container->singleton('console', function(){
 				return Connector::getInstance();
+			});
+			$self = $this;
+			$this->error(function(\Exception $e) use ($self){
+				$message = $e->getMessage();
+
+				if($bitrixError = app()->GetException()){
+					$message.= "\r\n<br>[ ". $bitrixError->msg." ]";
+				}
+
+				if ($self->request->isAjax()) {
+					$self->config('debug', false);
+					$self->response->headers['content-type'] = 'application/json';
+					print json_encode(array('message' => $message));
+				} else {
+					if($this->config('debug')){
+						throw new UnhanledException($message, 0, $e);
+					} else {
+						print "error 500";
+					}
+				}
 			});
 		}
 
@@ -37,6 +59,7 @@ namespace beatrix {
 		/**
 		 * Set app templates directory
 		 * @param $path
+		 * @return $this
 		 */
 		public function addViewsDir($path) {
 			//todo priority
@@ -69,22 +92,18 @@ namespace beatrix {
 			$routeParams = $this->router->getCurrentRoute()->getParams();
 			$params = array_merge($routeParams, $params);
 
-			$queryParamsAdd = parse_url($this->request->getUrl(), PHP_URL_QUERY);
-			if ($queryParamsAdd) {
-				$queryParamsAdd = [parse_str($queryParamsAdd)];
-			} else {
-				$queryParamsAdd = array();
-			}
-			$queryParams = array_merge($queryParamsAdd, $queryParams);
+			$queryParamsExtended = URL::extendQueryParams($queryParams);
 
 			$url = parent::urlFor($name, $params);
 			if($queryParams){
-				$url .= '?' . http_build_query($queryParams);
+				$url .= '?' . $queryParamsExtended;
 			}
 			return $url;
 		}
 
 	}
+
+	class UnhanledException extends \Exception{}
 }
 
 namespace {
@@ -92,7 +111,7 @@ namespace {
 	/**
 	 * @see Beatrix
 	 */
-	class Beatrix extends \beatrix\Beatrix
+	class Beatrix extends \beatrix\Application
 	{
 		/**
 		 * @param array $settings

@@ -5,6 +5,7 @@ use beatrix\DbResultIterator;
 use CIBlockElement;
 
 class Query
+
 {
 	private $iblockCode;
 	private $selectFields;
@@ -28,14 +29,22 @@ class Query
 		return new static($iblockCode);
 	}
 
-	public function select(array $fields = array()) {
-		$this->selectFields = $fields;
+	public function select($fields = array()) {
+		$this->selectFields = (array) $fields;
 		//todo all using * from metadata
 		return $this;
 	}
 
 	public function filter(array $filter) {
 		$this->filter = $filter;
+		return $this;
+	}
+
+	public function propertyFilter(array $filter) {
+		$this->filter = (array)$this->filter;
+		foreach ($filter as $propName => $val) {
+			$this->filter['PROPERTY_' . $propName . '_VALUE'] = $filter;
+		}
 		return $this;
 	}
 
@@ -51,6 +60,11 @@ class Query
 
 	public function order($order) {
 		$this->order = $order;
+		return $this;
+	}
+
+	public function random() {
+		$this->order = array('rand'=>'asc');
 		return $this;
 	}
 
@@ -80,6 +94,7 @@ class Query
 	}
 
 	public function getElements($pageSize = null, $pageNumber = null) {
+		//todo cache shortcut
 		if (!is_null($pageSize)) {
 			$this->limit($pageSize);
 		}
@@ -91,13 +106,14 @@ class Query
 		$group = $this->normalizeGrouping(false);
 		$navParams = $this->normalizeNavParams();
 		$select = $this->normalizeSelect();
-		return CIBlockElement::GetList(
+		$CDBResult = CIBlockElement::GetList(
 			$order,
 			$filter,
 			$group,
 			$navParams,
 			$select
 		);
+		return new ElementsResult($CDBResult);
 	}
 
 	public function getSections($includeCount = false) {
@@ -105,13 +121,14 @@ class Query
 		$filter = $this->normalizeFilter();
 		$navParams = $this->normalizeNavParams();
 		$select = $this->normalizeSelect();
-		return \CIBlockSection::GetList(
+		$CDBResult = \CIBlockSection::GetList(
 			$order,
 			$filter,
 			$includeCount,
 			$select,
 			$navParams
 		);
+		return new SectionsResult($CDBResult);
 	}
 
 	/**
@@ -127,7 +144,14 @@ class Query
 		if ($this->activeOnly) {
 			$filter['ACTIVE'] = 'Y';
 		}
-		$filter['IBLOCK_CODE'] = $this->iblockCode;
+		$filter["IBLOCK_LID"] = SITE_ID;
+		//todo flag methods:
+//		$filter["CHECK_PERMISSIONS"] = "Y";
+//		$filter["ACTIVE_DATE"] = "Y";
+
+		if(!is_null($this->iblockCode)){
+			$filter['IBLOCK_CODE'] = $this->iblockCode;
+		}
 		if ($this->selectId) {
 			$filter = array('ID' => $this->selectId);
 		} elseif ($this->sectionCodes) {
@@ -154,9 +178,11 @@ class Query
 	}
 
 	/**
+	 * Select only items in active date range (affects only elements)
 	 * @param boolean $activeOnly
+	 * @return $this
 	 */
-	public function activeOnly($activeOnly) {
+	public function activeOnly($activeOnly = true) {
 		$this->activeOnly = $activeOnly;
 		return $this;
 	}
@@ -185,6 +211,7 @@ class Query
 	private function normalizeSelect() {
 		$select = (array)$this->selectFields;
 		$select[] = 'IBLOCK_ID';
+		$select[] = 'DETAIL_PAGE_URL';
 		//todo handle PROPERTY_* from metadata
 		return array_unique($select);
 	}
