@@ -40,7 +40,7 @@ namespace beatrix {
 					$self->response->headers['content-type'] = 'application/json';
 					print json_encode(array('message' => $message));
 				} else {
-					if($this->config('debug')){
+					if($self->config('debug')){
 						throw new UnhanledException($message, 0, $e);
 					} else {
 						print "error 500";

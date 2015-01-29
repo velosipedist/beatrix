@@ -19,7 +19,8 @@ class TreeBuilder {
 
 	private function build($items) {
 		$itemSet = array();
-		$currentDepth = current($items)[$this->depthKey];
+		$current = current($items);
+		$currentDepth = $current[$this->depthKey];
 		$skip = 0;
 		foreach ($items as $i => $nextItem) {
 			$itemDepth = $nextItem[$this->depthKey];

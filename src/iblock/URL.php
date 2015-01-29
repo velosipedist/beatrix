@@ -31,8 +31,9 @@ class URL {
 			foreach ($sections as $chainPart) {
 				$urlParts[] = $chainPart['CODE'];
 			}
+			$current = current($sections);
 			$breadcrumbs[]= array(
-				'NAME'=> current($sections)['NAME'],
+				'NAME'=> $current['NAME'],
 				'URL'=> rtrim($root, '/') . '/'. implode('/',$urlParts) .'/',
 			);
 			array_shift($sections);
