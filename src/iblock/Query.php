@@ -43,7 +43,7 @@ class Query
 	public function propertyFilter(array $filter) {
 		$this->filter = (array)$this->filter;
 		foreach ($filter as $propName => $val) {
-			$this->filter['PROPERTY_' . $propName . '_VALUE'] = $filter;
+			$this->filter['PROPERTY_' . $propName . '_VALUE'] = $val;
 		}
 		return $this;
 	}
