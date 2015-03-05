@@ -1,8 +1,8 @@
+![Make Bitrix adopted to real world](http://velosipedist.org/images/beatrix/mascot-mini.png)
+
 # Beatrix
 
-Let's beat the Bitrix defectiveness. You should not know what is inside.
-
-![Make Bitrix adopted to real world](http://news.rin.ru/pictures/16/249031.jpg)
+Attempt to beat the Bitrix defectiveness. You should not know what is inside.
 
 ## What i have to do?
 
@@ -24,7 +24,8 @@ Some options will be forced internally, others available as described in [Slim d
 
 ## Nothing changed. What's next?
 
-Of course. There is no magic (almost), you have to write some code yourself.
+Of course. There is no magic (almost), you have to write some code yourself :unamused:.
+
 All Beatrix instance methods available through `Beatrix::app()`, also we have some useful shortcut functions.
 
 For now we have following features:
