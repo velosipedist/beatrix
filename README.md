@@ -1,4 +1,4 @@
-![Make Bitrix adopted to real world](http://velosipedist.org/images/beatrix/mascot-mini.png)
+![Face the truth — now it is better, much better!](http://velosipedist.org/images/beatrix/mascot-mini.png)
 
 # Beatrix
 
