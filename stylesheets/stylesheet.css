@@ -53,6 +53,19 @@ a {
       margin-top: 1rem;
       margin-left: 0; } }
 
+.sw-intro{
+    text-align: center;
+}
+.sw-intro span{
+    display: block;
+    text-align: center;
+    margin-bottom: .3em;
+}
+.sw-intro span:nth-child(1){font-size: .5em;}
+.sw-intro span:nth-child(2){font-size: .6em;}
+.sw-intro span:nth-child(3){font-size: .75em;}
+.sw-intro span:nth-child(4){font-size: .9em;}
+
 .page-header {
     color: #fff;
     text-align: center;
@@ -119,7 +132,7 @@ a {
   margin-top: 2rem;
   margin-bottom: 1rem;
   font-weight: normal;
-  color: #159957; }
+  color: #ee4000; }
 .main-content p {
   margin-bottom: 1em; }
 .main-content code {
