@@ -59,12 +59,13 @@ a {
 .sw-intro span{
     display: block;
     text-align: center;
-    margin-bottom: .3em;
+    line-height: 1.4em;
 }
-.sw-intro span:nth-child(1){font-size: .5em;}
-.sw-intro span:nth-child(2){font-size: .6em;}
-.sw-intro span:nth-child(3){font-size: .75em;}
-.sw-intro span:nth-child(4){font-size: .9em;}
+.sw-intro span:nth-child(1){font-size: .6em;opacity: .6;}
+.sw-intro span:nth-child(2){font-size: .75em;opacity: .7;}
+.sw-intro span:nth-child(3){font-size: .87em;opacity: .8;}
+.sw-intro span:nth-child(4){font-size: .9em;opacity: .9;}
+.sw-intro span:nth-child(5){font-size: 1.1em;}
 
 .page-header {
     color: #fff;
