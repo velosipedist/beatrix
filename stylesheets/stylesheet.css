@@ -72,7 +72,7 @@ a {
     background-color: #ee4000;
 }
 .logo{
-    background: url("/images/logo.png") 0 0 no-repeat;
+    background: url("../images/logo.png") 0 0 no-repeat;
     width: 248px;
     height: 248px;
     display: inline-block;
