@@ -54,11 +54,18 @@ a {
       margin-left: 0; } }
 
 .page-header {
-  color: #fff;
-  text-align: center;
-  background-color: #159957;
-  background-image: linear-gradient(120deg, #155799, #159957); }
-
+    color: #fff;
+    text-align: center;
+    background-color: #ee4000;
+}
+.logo{
+    background: url("/images/logo.png") 0 0 no-repeat;
+    width: 248px;
+    height: 248px;
+    display: inline-block;
+    outline: none;
+    margin-bottom: 15px;
+}
 @media screen and (min-width: 64em) {
   .page-header {
     padding: 5rem 6rem; } }
