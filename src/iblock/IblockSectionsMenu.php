@@ -1,10 +1,10 @@
 <?php
 namespace beatrix\iblock;
 
-use beatrix\DbResultIterator;
+use beatrix\db\ResultIterator;
 use beatrix\helpers\TreeBuilder;
 
-class Menu
+class IblockSectionsMenu
 {
 	private $itemsPlain = array();
 	private $iblockId;
@@ -19,9 +19,8 @@ class Menu
 		if (is_null($items)) {
 			$items = $this->itemsPlain;
 		}
-		$builder = new TreeBuilder($items, 'DEPTH_LEVEL', '__children');
-		//todo also iterator
-		return $builder->getTree($items);
+		$builder = new TreeBuilder($items, 'DEPTH_LEVEL', '#children');
+		return $builder;
 	}
 
 	/**
@@ -35,10 +34,10 @@ class Menu
 
 	/**
 	 * @param $sectionId
-	 * @return DbResultIterator
+	 * @return ResultIterator
 	 */
 	protected function loadSections($sectionId) {
-		$result = new DbResultIterator(
+		$result = new ResultIterator(
 			//todo only use certain parent SECTION_ID, if root — skip it, buggy >:|
 			\CIBlockSection::GetTreeList(
 				array('IBLOCK_ID' => $this->iblockId/*, 'SECTION_ID' => $sectionId*/)
@@ -47,4 +46,3 @@ class Menu
 		return $result;
 	}
 }
- 

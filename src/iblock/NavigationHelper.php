@@ -1,9 +1,10 @@
 <?php
 namespace beatrix\iblock;
-use beatrix\DbResultIterator;
+use beatrix\db\ResultIterator;
 use CIBlockSection;
+use League\Url\Url;
 
-class URL {
+class NavigationHelper {
 	private static $extractedItemChains = array();
 	private static $extractedItemSections = array();
 
@@ -11,7 +12,6 @@ class URL {
 		if ($withSections) {
 			$sectionId = self::extractSectionId($id);
 			$sectionUrl = self::sectionUrl($sectionId, $root);
-			\PC::debug($sectionUrl, 'secUrl');
 			return $sectionUrl . $id .'/';
 		}else{
 			return rtrim($root, '/') . '/' . $id .'/';
@@ -49,7 +49,7 @@ class URL {
 	public static function extractSectionChain($sectionId) {
 		if(!isset(self::$extractedItemChains[$sectionId])){
 			$result = CIBlockSection::GetNavChain(0, $sectionId);
-			$chain = DbResultIterator::from($result)->toArray();
+			$chain = ResultIterator::from($result)->toArray();
 			self::$extractedItemChains[$sectionId] = $chain;
 		}
 		return self::$extractedItemChains[$sectionId];
@@ -61,7 +61,9 @@ class URL {
 	 */
 	public static function extractSectionId($itemId) {
 		if(!isset(self::$extractedItemSections[$itemId])) {
-			$item = Query::from(null)->byId($itemId)->select(array('IBLOCK_SECTION_ID'))->getElements()->GetNext();
+			$item = Query::from(null)->byId($itemId)->select(array('IBLOCK_SECTION_ID'))
+                ->getElements()
+                ->current();
 			$sectionId = $item['IBLOCK_SECTION_ID'];
 			self::$extractedItemSections[$itemId] = $sectionId;
 		}
@@ -76,7 +78,6 @@ class URL {
 	public static function sectionUrl($sectionId, $root = '/') {
 		$sections = self::extractSectionChain($sectionId);
 		$pathParts = array_pluck($sections, 'CODE');
-		\PC::debug($sectionId, 'urlParts');
 		$sectionUrl = rtrim($root, '/') . '/' . implode('/', $pathParts) . '/';
 		return $sectionUrl;
 	}
@@ -94,5 +95,12 @@ class URL {
 
 		return http_build_query($queryParams);
 	}
+
+    /**
+     * @return Url
+     */
+    public static function currentUrl()
+    {
+        return Url::createFromServer($_SERVER);
+    }
 }
- 

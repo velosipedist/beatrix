@@ -1,55 +1,107 @@
 <?php
 namespace beatrix\helpers;
-class TreeBuilder {
 
-	private $depthKey;
-	private $childrenKey;
-	private $tree;
+/**
+ * Transforms plain menu items with depth values into nested array.
+ * Also can create recursive tree iterator.
+ */
+class TreeBuilder
+{
 
-	function __construct($plainList, $depthKey, $childrenKey = '__children') {
-		$this->depthKey = $depthKey;
-		$this->childrenKey = $childrenKey;
-		$this->tree = $this->build($plainList);
-	}
+    private $depthKey;
+    private $childrenKey;
+    private $tree;
+    /**
+     * @var callable
+     */
+    private $itemBuiltHook;
 
-	function __invoke() {
-		return $this->getTree();
-	}
+    function __construct($plainList, $depthKey, $childrenKey = '#children', $itemBuiltHook = null)
+    {
+        $this->depthKey = $depthKey;
+        $this->childrenKey = $childrenKey;
+        $list = array();
+        foreach ($plainList as $k => $val) {
+            if (is_int($k)) {
+                $list[$k] = $val;
+            }
+        }
+        $this->itemBuiltHook = $itemBuiltHook;
+        $this->tree = $this->buildTreeFromItems($list, 1);
+    }
 
+    private function buildTreeFromItems($items, $level, &$lastAddedItemIndex = null)
+    {
+        $result = array();
+        foreach ($items as $i => $nextItem) {
+            $nextItemLevel = $nextItem[$this->depthKey];
+            if ($nextItemLevel == $level) {
+                $result[] = $nextItem;
+            } elseif ($nextItemLevel == ($level + 1)) {
+                end($result);
+                $lastResultKey = key($result);
+                if (isset($result[$lastResultKey][$this->childrenKey])) {
+                    continue;
+                }
+                $itemsDeeper = array();
+                foreach (array_slice($items, $i) as $d => $subItem) {
+                    $subItemLevel = $subItem[$this->depthKey];
+                    if ($subItemLevel < $nextItemLevel) {
+                        break;
+                    }
+                    $itemsDeeper[$d] = $subItem;
+                }
 
-	private function build($items) {
-		$itemSet = array();
-		$current = current($items);
-		$currentDepth = $current[$this->depthKey];
-		$skip = 0;
-		foreach ($items as $i => $nextItem) {
-			$itemDepth = $nextItem[$this->depthKey];
-			if (($itemDepth > $currentDepth) && ($skip > 0)) {
-				$skip--;
-				continue;
-			}
-			if ($itemDepth < $currentDepth) {
-				break;
-			} elseif ($itemDepth > $currentDepth) {
-				$children = $this->build(array_slice($items, $i));
-				end($itemSet);
-				$prevItemIndex = key($itemSet);
-				$itemSet[$prevItemIndex][$this->childrenKey] = $children;
-				$skip = count($children);
-			} else {
-				$itemSet[] = $nextItem;
-				$skip = 0;
-			}
-		}
-		return $itemSet;
-	}
+                $childTree = $this->buildTreeFromItems(
+                    $itemsDeeper,
+                    $level + 1,
+                    $lastAddedItemIndex
+                );
+                $hasSelectedChild = false;
+                foreach ($childTree as $child) {
+                    if ($child['SELECTED']) {
+                        $hasSelectedChild = true;
+                        break;
+                    }
+                }
+                //todo make special keys prefixed with #
+                $result[$lastResultKey]['HAS_SELECTED_CHILD'] = $hasSelectedChild;
+                $result[$lastResultKey][$this->childrenKey] = $childTree;
+            }
+        }
+        if ($this->itemBuiltHook) {
+            foreach ($result as &$item) {
+                $item = call_user_func_array($this->itemBuiltHook, [$item]);
+            }
+        }
 
-	/**
-	 * @return array
-	 */
-	public function getTree() {
-		return $this->tree;
-	}
+        return $result;
+    }
 
+    /**
+     * Tree of array items, with sub-items under [#childrenKey] each
+     * @return array
+     */
+    public function getTreeArray()
+    {
+        return $this->tree;
+    }
+
+    /**
+     * Iterate for tree rendering, beginning from root by default.
+     * @param int $mode
+     * @param int $flags
+     * @return \RecursiveTreeIterator
+     */
+    public function getTreeIterator($mode = null, $flags = 0)
+    {
+        if (is_null($mode)) {
+            $mode = \RecursiveIteratorIterator::SELF_FIRST;
+        }
+        return new \RecursiveTreeIterator(
+            new TreeIterator($this->tree, $this->childrenKey),
+            $mode,
+            $flags
+        );
+    }
 }
- 
