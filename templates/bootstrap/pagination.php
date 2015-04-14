@@ -10,7 +10,6 @@
  * @var $showStartEndArrows
  * @var $showArrowsWhenInactive
  * @var $size null | 'sm' | 'lg'
- * @var CAllDBResult $result
  *
  * auto-computed vars
  * @var bool $isPrevArrowActive
@@ -41,11 +40,11 @@ if(!isset($showArrowsWhenInactive)) {
 $startUrl = str_replace('__PAGENUMBER__', 1, $urlStartTemplate);
 $prevUrl = str_replace(
 	'__PAGENUMBER__',
-	$result->NavPageNomer - 1,
-	($result->NavPageNomer == 2 ? $urlStartTemplate : $urlTemplate)
+	$pageNumber - 1,
+	($pageNumber == 2 ? $urlStartTemplate : $urlTemplate)
 );
-$nextUrl = str_replace('__PAGENUMBER__', $result->NavPageNomer + 1, $urlTemplate);
-$endUrl = str_replace('__PAGENUMBER__', $result->NavPageCount, $urlTemplate);
+$nextUrl = str_replace('__PAGENUMBER__', $pageNumber + 1, $urlTemplate);
+$endUrl = str_replace('__PAGENUMBER__', $pageCount, $urlTemplate);
 ?>
 <ul class="pagination <?=($size ? "pagination-$size" : '')?>">
 	<?if($showArrows):?>
@@ -68,8 +67,8 @@ $endUrl = str_replace('__PAGENUMBER__', $result->NavPageCount, $urlTemplate);
 	<?endif?>
 <!--	numbers-->
 	<?
-	foreach (range(1, $result->NavPageCount) as $pageNum) {
-		$isActive = $pageNum == $result->NavPageNomer;
+	foreach (range(1, $pageCount) as $pageNum) {
+		$isActive = $pageNum == $pageNumber;
 		$url = str_replace('__PAGENUMBER__', $pageNum, ($pageNum == 1 ? $urlStartTemplate : $urlTemplate));
 	?>
 		<li <?=$isActive ? 'class="active"' : ''?>><a href="<?=$url?>"><?=$pageNum?></a></li>
