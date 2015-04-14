@@ -3,7 +3,6 @@ namespace beatrix\iblock;
 /**
  * @mixin \CIBlockResult
  */
-
 class SectionsResult{
 	private $_result;
 
@@ -27,4 +26,3 @@ class SectionsResult{
 		$this->_result->{$name} = $value;
 	}
 }
- 
