@@ -340,7 +340,7 @@ class Query
             $filter['SECTION_ID'] = isset($filter['SECTION_ID']) ? (array)$filter['SECTION_ID'] : array();
 
             $sectionCodes = $this->sectionCodes;
-            foreach ($sectionCodes as $c => &$code) {
+            foreach ($sectionCodes as $c => $code) {
                 if (is_numeric($code)) {
                     $filter['SECTION_ID'][] = (int)$code;
                     unset($sectionCodes[$c]);
