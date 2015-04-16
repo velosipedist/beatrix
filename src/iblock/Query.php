@@ -90,6 +90,7 @@ class Query
         $fields = array_filter($fields, function ($f) use (&$addFields, &$hasPropertiesWildcard) {
             if (strpos($f, 'PROPERTY_') === 0) {
                 $properties = Metadata::getIblockPropertiesMap($this->iblockCode);
+                $this->isPropertiesQueried = true;
                 if ($f == 'PROPERTY_*') {
                     $hasPropertiesWildcard = true;
                     foreach ($properties as $code => $data) {
@@ -277,7 +278,6 @@ class Query
         $group = $this->normalizeGrouping(false);
         $navParams = $this->normalizeNavParams();
         $select = $this->normalizeSelect();
-        $this->checkIsPropertiesQueried($select);
         $result = CIBlockElement::GetList(
             $order,
             $filter,
@@ -426,16 +426,5 @@ class Query
     public function getIsPropertiesQueried()
     {
         return $this->isPropertiesQueried;
-    }
-
-    private function checkIsPropertiesQueried($fields)
-    {
-        foreach ($fields as $field) {
-            if(strpos($field, 'PROPERTY_') === 0){
-                $this->isPropertiesQueried = true;
-                return true;
-            }
-        }
-        return false;
     }
 }

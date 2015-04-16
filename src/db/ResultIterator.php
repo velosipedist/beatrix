@@ -145,10 +145,10 @@ class ResultIterator implements Iterator, Countable
                 return false;
             }
             $elemData = $elem->GetFields();
-            //todo skip properties auto-fetching if no props was queried
-            // if $this->result->getQuery()->getIsPropertiesQueried() ...
-            if ($elem instanceof \_CIBElement) {
+
+            if ($elem instanceof \_CIBElement && $this->result->getQuery()->getIsPropertiesQueried()) {
                 $elemData['PROPERTIES'] = $elem->GetProperties();
+                \PC::debug($elemData['PROPERTIES']);
                 foreach ($elemData['PROPERTIES'] as $code => &$prop) {
                     $elemData['PROPERTY_' . strtoupper($code) . '_VALUE'] = $prop['VALUE'];
                     if ($prop['PROPERTY_TYPE'] == 'F') {
