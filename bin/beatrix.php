@@ -5,6 +5,7 @@ if(!in_array(PHP_SAPI, array('cli','cgi-fcgi'))){
 }
 $app = new \Symfony\Component\Console\Application('Beatrix console', '1.0');
 $app->addCommands(array(
-	new \beatrix\commands\PageCommand('page'),
+	new \beatrix\commands\PageCommand(),
+	new \beatrix\commands\BuildPharCommand(),
 ));
 $app->run();
