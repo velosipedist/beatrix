@@ -54,11 +54,11 @@ class PageCommand extends Command
 
         // save index page
         $indexContents = <<<PHP
-	<?php
-	require(\$_SERVER["DOCUMENT_ROOT"] . "/bitrix/header.php");
-	\$APPLICATION->SetTitle("{$titleEscaped}");?>
-	<p>Страница {$title}</p>
-	<?php require(\$_SERVER["DOCUMENT_ROOT"] . "/bitrix/footer.php"); ?>
+<?php
+require(\$_SERVER["DOCUMENT_ROOT"] . "/bitrix/header.php");
+\$APPLICATION->SetTitle("{$titleEscaped}");?>
+<p>Страница {$title}</p>
+<?php require(\$_SERVER["DOCUMENT_ROOT"] . "/bitrix/footer.php"); ?>
 PHP;
 
         $indexWritten = file_put_contents($targetFile, $indexContents);
