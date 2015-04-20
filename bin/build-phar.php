@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$brg = new Burgomaster(__DIR__ . '/phar', __DIR__ . '/..');
+$brg = new Burgomaster(__DIR__ . '/../build/phar', __DIR__ . '/..');
 $dirs = [
     'vendor/composer',
     'vendor/illuminate/support',
@@ -24,6 +24,7 @@ $files = [
     'vendor/symfony/finder/Symfony/Component/Finder/SplFileInfo.php',
     'vendor/siriusphp/validation/autoload.php',
     'vendor/hamcrest/hamcrest-php/hamcrest/Hamcrest.php',
+    'bin/beatrix.php',
     'src/Beatrix.php',
     'src/functions.php',
     'vendor/autoload.php',
@@ -51,4 +52,4 @@ foreach (['Adapter', 'Comparator', 'Exception', 'Expression', 'Iterator', 'Shell
 }
 
 // non-PSR sources
-$brg->createPhar('build/beatrix.phar', null, 'vendor/autoload.php');
+$brg->createPhar('build/beatrix.phar', null, 'bin/beatrix.php');

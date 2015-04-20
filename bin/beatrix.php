@@ -1,7 +1,6 @@
 <?php
-//todo! make it working in future!
 require_once __DIR__ .'/../vendor/autoload.php';
-if(!in_array(PHP_SAPI,array('cli','cgi-fcgi'))){
+if(!in_array(PHP_SAPI, array('cli','cgi-fcgi'))){
     return;
 }
 $app = new \Symfony\Component\Console\Application('Beatrix console', '1.0');
