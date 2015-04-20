@@ -35,9 +35,9 @@ class Beatrix
      */
     public static function app()
     {
-        $app = Application::getInstance();
-        if(!$app){
-            throw new LogicException("Call Beatrix::init() first");
+        $app = Application::getInstance() or new Application();
+        if (!$app) {
+            $app = new Application();
         }
         return $app;
     }
@@ -60,7 +60,7 @@ class Beatrix
     {
         if (!static::$layout) {
             static::$layout = static::view()->make('beatrix::layout/empty');
-            if(!static::app()->request->isAjax()){
+            if (!static::app()->request->isAjax()) {
                 static::$layout->setLayout('layout/' . SITE_TEMPLATE_ID);
             }
         }
@@ -81,7 +81,7 @@ class Beatrix
     public static function templateFooter()
     {
         $buffered = ob_get_clean();
-        print static::$layout->setSection('content', $buffered)
+        print static::layout()->setSection('content', $buffered)
             ->render();
     }
 }

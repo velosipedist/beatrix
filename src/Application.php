@@ -56,6 +56,9 @@ class Application extends Slim
         $parent['log.enabled'] = false;
         $parent['routes.case_sensitive'] = false;
         $parent['view'] = '\beatrix\view\PlatesView';
+        if (isset($_SERVER['DOCUMENT_ROOT']) && is_dir($_SERVER['DOCUMENT_ROOT'] . '/.tpl')) {
+            $parent[\Beatrix::SETTINGS_TEMPLATES_DIR] = $_SERVER['DOCUMENT_ROOT'] . '/.tpl';
+        }
         return $parent;
     }
 
