@@ -1,0 +1,12 @@
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.6/phpunit.xsd"
+         bootstrap="/tests/after_pack/bootstrap.php"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true">
+    <testsuites>
+        <testsuite name="AfterPack">
+            <directory>./tests/after_pack/</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
