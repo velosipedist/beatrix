@@ -3,6 +3,7 @@ namespace beatrix\iblock;
 
 use beatrix\db\ResultIterator;
 use CIBlockElement;
+
 //todo separate to abstract query and element/section/etc subclasses
 /**
  * Elements or sections selecting query, reurns decorated result after execution.
@@ -83,7 +84,7 @@ class Query
      */
     public function select($fields = array())
     {
-        $fields = array_flatten(func_get_args());
+        $fields = (array) $fields;
         $addFields = array();
         $hasPropertiesWildcard = false;
         //todo move this normalization to element query call, when byId flag may be applied
@@ -210,13 +211,12 @@ class Query
 
     /**
      * Group by fields
-     * @param array $group
-     * @param ... Group fields as separate params
+     * @param string|string[] $group
      * @return $this
      */
     public function group($group)
     {
-        $this->grouping = array_flatten(func_get_args());
+        $this->grouping = (array)$group;
         return $this;
     }
 
@@ -234,12 +234,11 @@ class Query
     /**
      * Filter by section code(s)
      * @param string|string[] $codes
-     * @param ... Codes as separate params
      * @return $this
      */
     public function inSections($codes)
     {
-        $this->sectionCodes = array_flatten(func_get_args());
+        $this->sectionCodes = (array)$codes;
         return $this;
     }
 
@@ -261,8 +260,8 @@ class Query
 
     /**
      * Execute query and return elements db result
-     * @param null $pageSize
-     * @param null $pageNumber
+     * @param int|null $pageSize
+     * @param int|null $pageNumber
      * @return ResultIterator
      */
     public function getElements($pageSize = null, $pageParam = null)
@@ -359,10 +358,10 @@ class Query
             }
         } else {
             // fix selector bug
-            if (is_array($filter['SECTION_ID']) && empty($filter['SECTION_ID'])) {
+            if (isset($filter['SECTION_ID']) && is_array($filter['SECTION_ID']) && empty($filter['SECTION_ID'])) {
                 unset($filter['SECTION_ID']);
             }
-            if (is_array($filter['SECTION_CODE']) && empty($filter['SECTION_CODE'])) {
+            if (isset($filter['SECTION_CODE']) && is_array($filter['SECTION_CODE']) && empty($filter['SECTION_CODE'])) {
                 unset($filter['SECTION_CODE']);
             }
         }
