@@ -107,7 +107,6 @@ class ResultIterator implements Iterator, Countable
         if ($this->result->NavPageCount < 2) {
             return '';
         }
-        //todo parametrize placeholder ?
         $params = array($this->pageUrlParam => '__PAGENUMBER__');
         $currentUrl = NavigationHelper::currentUrl();
         $currentUrl->getQuery()->modify($params);
@@ -148,7 +147,6 @@ class ResultIterator implements Iterator, Countable
 
             if ($elem instanceof \_CIBElement && $this->result->getQuery()->getIsPropertiesQueried()) {
                 $elemData['PROPERTIES'] = $elem->GetProperties();
-                \PC::debug($elemData['PROPERTIES']);
                 foreach ($elemData['PROPERTIES'] as $code => &$prop) {
                     $elemData['PROPERTY_' . strtoupper($code) . '_VALUE'] = $prop['VALUE'];
                     if ($prop['PROPERTY_TYPE'] == 'F') {

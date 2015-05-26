@@ -43,7 +43,6 @@ class Application extends Slim
                 }
             }
         });
-        $this->setupRoutes();
     }
 
     /**
@@ -56,6 +55,7 @@ class Application extends Slim
         $parent['log.enabled'] = false;
         $parent['routes.case_sensitive'] = false;
         $parent['view'] = '\beatrix\view\PlatesView';
+        // force default .tpl folder
         if (isset($_SERVER['DOCUMENT_ROOT']) && is_dir($_SERVER['DOCUMENT_ROOT'] . '/.tpl')) {
             $parent[\Beatrix::SETTINGS_TEMPLATES_DIR] = $_SERVER['DOCUMENT_ROOT'] . '/.tpl';
         }
@@ -76,14 +76,5 @@ class Application extends Slim
             $url .= '?' . NavigationHelper::extendQueryParams($queryParams);
         }
         return $url;
-    }
-
-    private function setupRoutes()
-    {
-        //todo centralize routing management
-//        $routes = $this->config(\Beatrix::SETTINGS_ROUTES) ?: array();
-//        foreach ($routes as $name => $config) {
-//            $this->router->addNamedRoute($name, new Route($config['pattern']));
-//        }
     }
 }

@@ -66,7 +66,6 @@ function crop($fileId, $size, $height = null, $pattern = '{dirname}/{basename}_c
     $thumbFile = rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . '/' . $thumbUrl;
     if (!file_exists($thumbFile)) {
         $imagePath = rtrim($_SERVER['DOCUMENT_ROOT'], '/\\') . $webPath;
-        imagecreatefromjpeg($imagePath);
         \Intervention\Image\ImageManagerStatic::make($imagePath)
             ->fit($size, $height)
             ->save($thumbFile);
@@ -79,8 +78,9 @@ function crop($fileId, $size, $height = null, $pattern = '{dirname}/{basename}_c
  * Real URL path
  * @return mixed
  */
-function getNavPath(){
-	return '/' . trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') . '/';
+function getNavPath()
+{
+    return '/' . trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') . '/';
 }
 
 /**
@@ -88,15 +88,16 @@ function getNavPath(){
  * @param boolean $path
  * @return array Path parts as ['/root/', '/root/child/', '/root/child/current/']
  */
-function getPathChain($path=false){
-	$path = $path ? $path : getNavPath();
-	$parts = explode('/', trim($path, '/'));
-	$ret = array();
-	foreach($parts as $i=>$part){
-		$piece = array_slice($parts, 0, $i + 1);
-		$ret[]= '/'.implode('/', $piece) .'/';
-	}
-	return $ret;
+function getPathChain($path = '')
+{
+    $path = $path ? $path : getNavPath();
+    $parts = explode('/', trim($path, '/'));
+    $ret = array();
+    foreach ($parts as $i => $part) {
+        $piece = array_slice($parts, 0, $i + 1);
+        $ret[] = '/' . implode('/', $piece) . '/';
+    }
+    return $ret;
 }
 
 /**
@@ -104,20 +105,21 @@ function getPathChain($path=false){
  * @param bool $path
  * @return array
  */
-function getNavChain($path=false){
+function getNavChain($path = false)
+{
     /** @var CMain $app */
     $app = $GLOBALS['APPLICATION'];
-    $chainTemplatePath = CSite::GetSiteDocRoot(SITE_ID).BX_PERSONAL_ROOT.'/templates/.default/chain_template.php';
-    if(!file_exists(BX_PERSONAL_ROOT."/templates/.default/chain_template.php")){
+    $chainTemplatePath = CSite::GetSiteDocRoot(SITE_ID) . BX_PERSONAL_ROOT . '/templates/.default/chain_template.php';
+    if (!file_exists(BX_PERSONAL_ROOT . "/templates/.default/chain_template.php")) {
         file_put_contents($chainTemplatePath, '<? return $arResult;');
     }
-	if($path){
-		$chainIndex = $path;
-		if(!$app->navChains[$chainIndex]){
+    if ($path) {
+        $chainIndex = $path;
+        if (!$app->navChains[$chainIndex]) {
             $app->navChains[$chainIndex] = $app->GetNavChain($path, false, false, true);
-		}
-		return $app->navChains[$chainIndex];
-	}else{
-		return $app->GetNavChain(false, 0, false, true);
-	}
+        }
+        return $app->navChains[$chainIndex];
+    } else {
+        return $app->GetNavChain(false, 0, false, true);
+    }
 }
