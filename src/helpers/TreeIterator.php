@@ -7,27 +7,22 @@ use RecursiveArrayIterator;
  * Recursive tree array iterator, for nested structures like menus.
  */
 class TreeIterator extends \RecursiveArrayIterator {
-    /**
-     * @var string
-     */
-    private $childrenKey;
 
-    function __construct(array $array, $childrenKey = '#children', $flags = 0)
+    function __construct(array $array, $flags = 0)
     {
         parent::__construct($array, $flags);
-        $this->childrenKey = $childrenKey;
     }
 
     public function hasChildren()
     {
         $current = $this->current();
-        return isset($current[$this->childrenKey]) && is_array($current[$this->childrenKey]);
+        return isset($current[TreeBuilder::CHILDREN]) && is_array($current[TreeBuilder::CHILDREN]);
     }
 
     public function getChildren()
     {
         $current = $this->current();
-        return $current[$this->childrenKey];
+        return $current[TreeBuilder::CHILDREN];
     }
 
 //    function __toString()
