@@ -7,19 +7,25 @@ namespace beatrix\helpers;
  */
 class TreeBuilder
 {
-
+    const CHILDREN = '#children';
+    const HAS_SELECTED_CHILD = '#has-active-child';
+    /**
+     * @var string
+     */
     private $depthKey;
-    private $childrenKey;
+    /**
+     * @var array
+     */
     private $tree;
+
     /**
      * @var callable
      */
     private $itemBuiltHook;
 
-    function __construct($plainList, $depthKey, $childrenKey = '#children', $itemBuiltHook = null)
+    function __construct($plainList, $depthKey = null, $itemBuiltHook = null)
     {
-        $this->depthKey = $depthKey;
-        $this->childrenKey = $childrenKey;
+        $this->depthKey = $depthKey or 'DEPTH_LEVEL';
         $list = array();
         foreach ($plainList as $k => $val) {
             if (is_int($k)) {
@@ -30,6 +36,12 @@ class TreeBuilder
         $this->tree = $this->buildTreeFromItems($list, 1);
     }
 
+    /**
+     * @param $items
+     * @param $level
+     * @param null $lastAddedItemIndex
+     * @return array
+     */
     private function buildTreeFromItems($items, $level, &$lastAddedItemIndex = null)
     {
         $result = array();
@@ -40,7 +52,7 @@ class TreeBuilder
             } elseif ($nextItemLevel == ($level + 1)) {
                 end($result);
                 $lastResultKey = key($result);
-                if (isset($result[$lastResultKey][$this->childrenKey])) {
+                if (isset($result[$lastResultKey][self::CHILDREN])) {
                     continue;
                 }
                 $itemsDeeper = array();
@@ -64,9 +76,8 @@ class TreeBuilder
                         break;
                     }
                 }
-                //todo make special keys prefixed with #
-                $result[$lastResultKey]['HAS_SELECTED_CHILD'] = $hasSelectedChild;
-                $result[$lastResultKey][$this->childrenKey] = $childTree;
+                $result[$lastResultKey][self::HAS_SELECTED_CHILD] = $hasSelectedChild;
+                $result[$lastResultKey][self::CHILDREN] = $childTree;
             }
         }
         if ($this->itemBuiltHook) {
@@ -98,10 +109,6 @@ class TreeBuilder
         if (is_null($mode)) {
             $mode = \RecursiveIteratorIterator::SELF_FIRST;
         }
-        return new \RecursiveTreeIterator(
-            new TreeIterator($this->tree, $this->childrenKey),
-            $mode,
-            $flags
-        );
+        return new \RecursiveTreeIterator(new TreeIterator($this->tree), $mode, $flags);
     }
 }

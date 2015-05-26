@@ -1,0 +1,40 @@
+<project name="Beatrix" default="build" basedir=".">
+    <property name="phar.output" value="build/beatrix.phar"/>
+
+    <target name="build" depends="tests">
+        <echo>Starting phar build</echo>
+        <pharpackage basedir="." destfile="${phar.output}" stub="build/stub.php">
+            <fileset dir=".">
+                <include name="src/**"/>
+                <include name="templates/**"/>
+                <include name="vendor/autoload.php"/>
+                <include name="vendor/composer/**"/>
+                <include name="vendor/slim/slim/Slim/**"/>
+                <include name="vendor/illuminate/support/Illuminate/Support/**/*.php"/>
+                <include name="vendor/league/plates/src/**"/>
+                <include name="vendor/league/url/src/**"/>
+                <include name="vendor/true/punycode/src/**"/>
+                <include name="vendor/siriusphp/validation/src/**"/>
+                <include name="vendor/suin/php-rss-writer/Source/**"/>
+                <include name="vendor/intervention/image/src/**"/>
+                <include name="vendor/siriusphp/validation/autoload.php"/>
+                <include name="vendor/hamcrest/hamcrest-php/hamcrest/Hamcrest.php"/>
+            </fileset>
+        </pharpackage>
+    </target>
+    <target name="tests">
+        <phpunit pharlocation="phpunit.phar" configuration="unit.phpunit.xml"
+                 haltonfailure="true" processisolation="true">
+            <formatter type="summary" usefile="false"/>
+            <batchtest>
+                <fileset dir="tests/unit">
+                    <include name="**/*Test.php"/>
+                </fileset>
+            </batchtest>
+        </phpunit>
+    </target>
+    <target name="after_pack">
+        <exec command="php phpunit.phar -c after_pack.phpunit.xml" passthru="true" checkreturn="true"/>
+    </target>
+
+</project>

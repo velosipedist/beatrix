@@ -1,6 +1,6 @@
 # Infoblock query utilities
 
-Now we can forget about endless `GetList()` docs & bugs. 
+Now we can forget about endless `GetList()` docs referring & bugs workaroundings. 
 We have all shortcuts needed to make iblock queries simple and predictable.
 
 ## Query elements or sections
@@ -8,7 +8,7 @@ We have all shortcuts needed to make iblock queries simple and predictable.
 ~~~php
 // get all elements of news infoblock
 $elements = Query::from('news')
-  ->select('NAME', 'DATE_ACTIVE_FROM', 'PROPERTY_*') // which fields and/or properties are needed
+  ->select(['NAME', 'DATE_ACTIVE_FROM', 'PROPERTY_*']) // which fields and/or properties are needed
   ->getElements();
 foreach($elements as $elem){
   // $elem is array with all Bitrix provided fields
@@ -24,7 +24,7 @@ foreach($elements as $elem){
 
 // sections list will be returned
 $sections = Query::from('news')
-  ->select('NAME', 'CODE')
+  ->select(['NAME', 'CODE'])
   ->getSections();
 ~~~
 
@@ -46,7 +46,7 @@ $query->propertyFilter([
 
 // enum properties filtering
 $query->enumFilter([
-  'married' => 'Y' // Y is code of vale, not the value label!
+  'married' => 'Y' // Y is code of value, not the value label!
 ]);
 
 // randomize output

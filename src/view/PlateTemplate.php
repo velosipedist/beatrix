@@ -194,10 +194,8 @@ class PlateTemplate extends Template
         } elseif ($delayedContent instanceof \Closure) {
             $rendered = (string)$delayedContent();
         } elseif (is_array($delayedContent)) {
-            list($template, $data) = $delayedContent;
-            if (!$data) {
-                $data = array();
-            }
+            $template = $delayedContent[0];
+            $data = array_get($delayedContent, 1, array());
             $rendered = $this->fetch($template, $data);
         }
         return $rendered;

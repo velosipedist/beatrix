@@ -1,7 +1,6 @@
 <?php
 namespace beatrix\iblock;
 \CModule::includeModule('iblock');
-
 /**
  * Iblock metadata registry.
  * Keeps reusable info about iblocks, their codes, sections and their codes, enum properties etc.
@@ -12,13 +11,19 @@ class Metadata
 
     public static function getIblockIdByCode($code)
     {
-        return static::resolveMapData('iblockIdMap', $code, function () use ($code) {
-            $result = \CIBlock::GetList(array(), array('CODE' => $code))->GetNext();
-            if (!$result) {
-                throw new \RuntimeException("No IBlock with code [$code]");
+        $map = self::getIblockMap();
+        return $map[$code]['ID'];
+    }
+
+    public static function getIblockCodeById($iblockId)
+    {
+        $map = self::getIblockMap();
+        foreach ($map as $code => $iblock) {
+            if($iblock['ID'] == $iblockId){
+               return $iblock['CODE'];
             }
-            return (int)$result['ID'];
-        });
+        }
+        return null;
     }
 
     public static function getIblockPropertyId($iblockId, $propertyCode)
@@ -68,11 +73,17 @@ class Metadata
     {
         $map = static::getIblockSectionsMap($iblockCode);
         foreach ($map as $code => $data) {
-            if($data['ID'] == $sectionId){
+            if ($data['ID'] == $sectionId) {
                 return $code;
             }
         }
         return null;
+    }
+
+    public static function getSectionIdByCode($sectionCode, $iblockCode)
+    {
+        $map = static::getIblockSectionsMap($iblockCode);
+        return isset($map[$sectionCode]) ? $map[$sectionCode]['ID'] : null;
     }
 
     public static function getIblockSectionsMap($iblockId)
@@ -94,14 +105,31 @@ class Metadata
 
     /**
      * Get some mapped data under passed key, fetches missing data at first read.
-     * @param $field
+     * @param $group
      * @param $key
      * @param $resolver
      * @return mixed
      */
-    private static function resolveMapData($field, $key, $resolver)
+    private static function resolveMapData($group, $key, $resolver)
     {
-        $val = array_get(static::$metadata[$field], $key, $resolver);
-        return static::$metadata[$field] = $val;
+        isset(static::$metadata[$group]) or static::$metadata[$group] = array();
+        $val = array_get(static::$metadata[$group], $key, $resolver);
+        return static::$metadata[$group][$key] = $val;
+    }
+
+    /**
+     * @param $code
+     * @return mixed
+     */
+    protected static function getIblockMap()
+    {
+        return static::resolveMapData('iblockMap', 0, function () {
+            $result = array();
+            $list = \CIBlock::GetList();
+            while ($row = $list->GetNext()) {
+                $result[$row['CODE']] = $row;
+            }
+            return $result;
+        });
     }
 }

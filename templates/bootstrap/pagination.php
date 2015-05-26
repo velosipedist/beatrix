@@ -36,7 +36,6 @@ if(!isset($showArrowsWhenInactive)) {
 	$showArrowsWhenInactive = true;
 }
 
-//todo refactor to pageUrl helper
 $startUrl = str_replace('__PAGENUMBER__', 1, $urlStartTemplate);
 $prevUrl = str_replace(
 	'__PAGENUMBER__',

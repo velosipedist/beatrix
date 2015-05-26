@@ -15,7 +15,7 @@
   ],
   "require": {
     "php": ">=5.3.0",
-    "slim/slim": "2.4.*",
+    "slim/slim": "2.*",
     "illuminate/support": "4.1.*",
     "symfony/console": "2.4.*",
     "league/plates": "3.*",
@@ -26,8 +26,7 @@
     "suin/php-rss-writer": "1.*"
   },
   "require-dev": {
-    "mockery/mockery": "0.9.*",
-    "mtdowling/burgomaster": "0.0.2"
+    "mockery/mockery": "0.9.*"
   },
   "autoload": {
     "psr-4": {
