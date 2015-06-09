@@ -84,7 +84,7 @@ class Query
      */
     public function select($fields = array())
     {
-        $fields = (array) $fields;
+        $fields = (array)$fields;
         $addFields = array();
         $hasPropertiesWildcard = false;
         //todo move this normalization to element query call, when byId flag may be applied
@@ -294,7 +294,7 @@ class Query
      */
     public function getSections($includeCount = false)
     {
-        $order = $this->normalizeOrder();
+        $order = is_null($this->order) ? array('LEFT_MARGIN' => 'ASC', 'SORT' => 'ASC') : $this->normalizeOrder();
         $filter = $this->normalizeFilter();
         $navParams = $this->normalizeNavParams();
         $select = $this->normalizeSelect();
@@ -408,6 +408,7 @@ class Query
         $select = $this->selectFields;
         $select[] = 'ID';
         $select[] = 'IBLOCK_ID';
+        $select[] = 'DEPTH_LEVEL';
         return array_unique($select);
     }
 
