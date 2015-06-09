@@ -25,7 +25,7 @@ class TreeBuilder
 
     function __construct($plainList, $depthKey = null, $itemBuiltHook = null)
     {
-        $this->depthKey = $depthKey or 'DEPTH_LEVEL';
+        $this->depthKey = is_null($depthKey) ? 'DEPTH_LEVEL' : $depthKey;
         $list = array();
         foreach ($plainList as $k => $val) {
             if (is_int($k)) {
