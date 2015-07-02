@@ -12,7 +12,7 @@ class Metadata
     public static function getIblockIdByCode($code)
     {
         $map = self::getIblockMap();
-        return $map[$code]['ID'];
+        return (int)$map[$code]['ID'];
     }
 
     public static function getIblockCodeById($iblockId)
@@ -29,7 +29,7 @@ class Metadata
     public static function getIblockPropertyId($iblockId, $propertyCode)
     {
         $properties = static::getIblockPropertiesMap($iblockId);
-        return $properties[$propertyCode]['ID'];
+        return (int)$properties[$propertyCode]['ID'];
     }
 
     public static function getIblockEnumChoices($iblockId, $propertyCode)
@@ -83,7 +83,7 @@ class Metadata
     public static function getSectionIdByCode($sectionCode, $iblockCode)
     {
         $map = static::getIblockSectionsMap($iblockCode);
-        return isset($map[$sectionCode]) ? $map[$sectionCode]['ID'] : null;
+        return isset($map[$sectionCode]) ? (int)$map[$sectionCode]['ID'] : null;
     }
 
     public static function getIblockSectionsMap($iblockId)
