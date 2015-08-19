@@ -82,7 +82,7 @@ class TreeBuilder
         }
         if ($this->itemBuiltHook) {
             foreach ($result as &$item) {
-                $item = call_user_func_array($this->itemBuiltHook, [$item]);
+                $item = call_user_func_array($this->itemBuiltHook, array($item));
             }
         }
 

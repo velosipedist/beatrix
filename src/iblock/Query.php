@@ -87,11 +87,13 @@ class Query
         $fields = (array)$fields;
         $addFields = array();
         $hasPropertiesWildcard = false;
+        $isPropertiesQueried = false;
+        $iblockCode = $this->iblockCode;
         //todo move this normalization to element query call, when byId flag may be applied
-        $fields = array_filter($fields, function ($f) use (&$addFields, &$hasPropertiesWildcard) {
+        $fields = array_filter($fields, function ($f) use (&$addFields, &$hasPropertiesWildcard, &$isPropertiesQueried, $iblockCode) {
             if (strpos($f, 'PROPERTY_') === 0) {
-                $properties = Metadata::getIblockPropertiesMap($this->iblockCode);
-                $this->isPropertiesQueried = true;
+                $properties = Metadata::getIblockPropertiesMap($iblockCode);
+                $isPropertiesQueried = true;
                 if ($f == 'PROPERTY_*') {
                     $hasPropertiesWildcard = true;
                     foreach ($properties as $code => $data) {
@@ -114,6 +116,7 @@ class Query
                 return true;
             }
         });
+        $this->isPropertiesQueried = $isPropertiesQueried;
         $this->selectFields = array_unique(array_merge($fields, $addFields));
         return $this;
     }
