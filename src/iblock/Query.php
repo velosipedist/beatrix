@@ -84,14 +84,16 @@ class Query
      */
     public function select($fields = array())
     {
-        $fields = (array) $fields;
+        $fields = (array)$fields;
         $addFields = array();
         $hasPropertiesWildcard = false;
+        $isPropertiesQueried = false;
+        $iblockCode = $this->iblockCode;
         //todo move this normalization to element query call, when byId flag may be applied
-        $fields = array_filter($fields, function ($f) use (&$addFields, &$hasPropertiesWildcard) {
+        $fields = array_filter($fields, function ($f) use (&$addFields, &$hasPropertiesWildcard, &$isPropertiesQueried, $iblockCode) {
             if (strpos($f, 'PROPERTY_') === 0) {
-                $properties = Metadata::getIblockPropertiesMap($this->iblockCode);
-                $this->isPropertiesQueried = true;
+                $properties = Metadata::getIblockPropertiesMap($iblockCode);
+                $isPropertiesQueried = true;
                 if ($f == 'PROPERTY_*') {
                     $hasPropertiesWildcard = true;
                     foreach ($properties as $code => $data) {
@@ -114,6 +116,7 @@ class Query
                 return true;
             }
         });
+        $this->isPropertiesQueried = $isPropertiesQueried;
         $this->selectFields = array_unique(array_merge($fields, $addFields));
         return $this;
     }
@@ -294,7 +297,7 @@ class Query
      */
     public function getSections($includeCount = false)
     {
-        $order = $this->normalizeOrder();
+        $order = is_null($this->order) ? array('LEFT_MARGIN' => 'ASC', 'SORT' => 'ASC') : $this->normalizeOrder();
         $filter = $this->normalizeFilter();
         $navParams = $this->normalizeNavParams();
         $select = $this->normalizeSelect();
@@ -408,6 +411,7 @@ class Query
         $select = $this->selectFields;
         $select[] = 'ID';
         $select[] = 'IBLOCK_ID';
+        $select[] = 'DEPTH_LEVEL';
         return array_unique($select);
     }
 
