@@ -60,7 +60,7 @@ class Beatrix
     {
         if (!static::$layout) {
             static::$layout = static::view()->make('beatrix::layout/empty');
-            if (!static::app()->request->isAjax()) {
+            if (!is_ajax()) {
                 static::$layout->setLayout('layout/' . SITE_TEMPLATE_ID);
             }
         }

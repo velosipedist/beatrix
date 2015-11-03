@@ -16,6 +16,9 @@ class MenuTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
+        if (!defined('SITE_ID')) {
+            define('SITE_ID', 'ru');
+        }
         if (!class_exists('CIBlock')) {
             class_alias(CIBlock::_cl(), 'CIBlock');
             class_alias(CModule::_cl(), 'CModule');
@@ -25,7 +28,7 @@ class MenuTest extends \PHPUnit_Framework_TestCase
         $ibMockResult = Mockery::mock('resultMock');
         $ibMockResult->shouldReceive('GetNext')
             ->andReturn(
-                array('NAME' => 'Foo', 'ID' => 1),
+                array('NAME' => 'Foo', 'ID' => 1, 'CODE' => 'foo'),
                 null
             );
         \beatrix\tests\mock\CIBlock::returnList($ibMockResult);
@@ -106,9 +109,11 @@ TREE;
             if (is_bool($line)) {
                 $line = (int)$line;
             }
+            if (is_array($line)) {
+                $line = 'Array';
+            }
             $line = "$k {$line}" . PHP_EOL;
             $treeDebug .= $line;
-            print $line;
         }
         $this->assertEquals($expect, rtrim($treeDebug), 'Tree must be built correctly');
     }
@@ -134,5 +139,5 @@ TREE;
     public function tearDown()
     {
         Mockery::close();
-	}
+    }
 }

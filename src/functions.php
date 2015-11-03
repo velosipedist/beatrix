@@ -11,7 +11,7 @@ function slim_url($name, $params = array(), $queryParams = array())
  * @param string $view
  * @param array $data
  * @param bool $return Whether to return rendering result
- * @internal param array $mergeData
+ * @return string
  */
 function view($view, $data = array(), $return = false)
 {
@@ -85,7 +85,7 @@ function getNavPath()
 
 /**
  * Gets current or passed path, exploded to array
- * @param boolean $path
+ * @param string $path
  * @return array Path parts as ['/root/', '/root/child/', '/root/child/current/']
  */
 function getPathChain($path = '')

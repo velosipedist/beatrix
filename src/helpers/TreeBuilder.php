@@ -71,7 +71,7 @@ class TreeBuilder
                 );
                 $hasSelectedChild = false;
                 foreach ($childTree as $child) {
-                    if ($child['SELECTED']) {
+                    if (isset($child['SELECTED']) && $child['SELECTED']) {
                         $hasSelectedChild = true;
                         break;
                     }
