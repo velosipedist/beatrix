@@ -141,7 +141,8 @@ class Query
     {
         $this->filter = (array)$this->filter;
         foreach ($filter as $propName => $val) {
-            $this->filter['PROPERTY_' . $propName . '_VALUE'] = $val;
+            list($prefix, $code) = static::extractFilterPrefix($propName);
+            $this->filter[$prefix . 'PROPERTY_' . $code . '_VALUE'] = $val;
         }
         return $this;
     }
