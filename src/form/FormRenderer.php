@@ -13,7 +13,9 @@ class FormRenderer
     /**
      * @var array
      */
-    private $inputPluginsRegistry = array();
+    private $inputPluginsRegistry = array(
+        'captcha' => '\beatrix\form\input\BitrixCaptcha'
+    );
 
     /**
      * Inject form instance
@@ -39,9 +41,14 @@ class FormRenderer
      */
     public function input($type = 'text', $name, array $attributes = array())
     {
-        $formValue = $this->form->getValue($name);
+        $pluginClass = $this->getRegisteredInputPlugin($type);
+        if ($pluginClass) {
+            return $this->runInputPlugin($pluginClass, $name, $attributes);
+        }
         $attributes = array_merge($this->htmlValidationAttributes($name, $type), $attributes);
+        $formValue = $this->form->getValue($name);
         switch ($type) {
+            case 'hidden':
             case 'text':
             case 'password':
             case 'color':
@@ -74,7 +81,9 @@ class FormRenderer
                 return '<textarea ' . $this->renderAttributes($attributes) . '>' . $formValue . '</textarea>';
                 break;
             default:
-                return $this->runInputPlugin($type, $formValue, $name, $attributes);
+                throw new \UnexpectedValueException(
+                    "No [$type] input plugin registered. Use renderer's __construct options"
+                );
                 break;
         }
         $attributes['type'] = array_get($attributes, 'type', $type);
@@ -203,8 +212,8 @@ class FormRenderer
 
         $html = array();
 
-        foreach ($choices as $value => $display) {
-            $html[] = $this->getSelectOption($display, $value, $selected);
+        foreach ($choices as $value => $optionConfig) {
+            $html[] = $this->getSelectOption($optionConfig, $value, $selected);
         }
 
         $attributes = array_merge($attributes, $this->htmlValidationAttributes($name, 'select'));
@@ -218,35 +227,42 @@ class FormRenderer
     /**
      * Get the select option for the given value.
      *
-     * @param  string $display
+     * @param  string $optionConfig
      * @param  string $value
      * @param  string $selected
      * @return string
      */
-    public function getSelectOption($display, $value, $selected)
+    public function getSelectOption($optionConfig, $value, $selected)
     {
-        if (is_array($display)) {
-            return $this->optionGroup($display, $value, $selected);
+        if (is_array($optionConfig)) {
+            if (array_key_exists(0, $optionConfig)) {
+                return $this->optionGroup($optionConfig, $value, $selected);
+            } else {
+                $label = $optionConfig['label'];
+                $value = array_pull($optionConfig, 'value', $label);
+                return $this->option($label, $value, $selected, $optionConfig);
+            }
         }
 
-        return $this->option($display, $value, $selected);
+        return $this->option($optionConfig, $value, $selected);
     }
 
     /**
      * Create a select element option.
      *
-     * @param  string $display
+     * @param  string $label
      * @param  string $value
      * @param  string $selected
+     * @param array $attributes
      * @return string
      */
-    protected function option($display, $value, $selected)
+    protected function option($label, $value, $selected, array $attributes = array())
     {
         $selected = $this->getSelectedValue($value, $selected);
 
-        $attributes = array('value' => e($value), 'selected' => $selected);
+        $attributes = array_merge(array('value' => e($value), 'selected' => $selected), $attributes);
 
-        return '<option ' . self::renderAttributes($attributes) . '>' . e($display) . '</option>';
+        return '<option ' . self::renderAttributes($attributes) . '>' . e($label) . '</option>';
     }
 
     /**
@@ -268,20 +284,26 @@ class FormRenderer
     /**
      * Create an option group form element.
      *
-     * @param  array $list
-     * @param  string $label
+     * @param  array $options
+     * @param  string $groupLabel
      * @param  string $selected
      * @return string
      */
-    protected function optionGroup($list, $label, $selected)
+    protected function optionGroup($options, $groupLabel, $selected)
     {
         $html = array();
 
-        foreach ($list as $value => $display) {
-            $html[] = $this->option($display, $value, $selected);
+        foreach ($options as $option) {
+            if (is_string($option)) {
+                $value = $optionLabel = $option;
+            } else {
+                $optionLabel = $option['label'];
+                $value = array_pull($option, 'value', $optionLabel);
+            }
+            $html[] = $this->option($optionLabel, $value, $selected);
         }
 
-        return '<optgroup label="' . e($label) . '">' . implode('', $html) . '</optgroup>';
+        return '<optgroup label="' . e($groupLabel) . '">' . implode("\r\n", $html) . '</optgroup>';
     }
 
     /**
@@ -377,7 +399,7 @@ class FormRenderer
      * @param $type
      * @return array
      */
-    private function htmlValidationAttributes($name, $type)
+    public function htmlValidationAttributes($name, $type)
     {
         $rules = $this->form->getRulesCollection($name);
         if (!$rules) {
@@ -400,20 +422,25 @@ class FormRenderer
     }
 
     /**
-     * @param $type
-     * @param $inputValue
+     * @param $class
      * @param $name
-     * @param $attributes
+     * @param array $attributes
      * @return string
+     * @internal param $inputValue
      */
-    private function runInputPlugin($type, $inputValue, $name, array $attributes)
+    private function runInputPlugin($class, $name, array $attributes)
     {
-        if (isset($this->inputPluginsRegistry[$type])) {
-            $class = $this->inputPluginsRegistry[$type];
-            /** @var FormInputInterface $plugin */
-            $plugin = new $class($this);
-            return $plugin->renderInput($name, $inputValue, $attributes);
-        }
-        throw new \UnexpectedValueException("No [$type] input registered. Use renderer's __construct options");
+        /** @var FormInputInterface $plugin */
+        $plugin = new $class($this);
+        return $plugin->renderInput($name, $attributes);
+    }
+
+    /**
+     * @param $type
+     * @return mixed
+     */
+    public function getRegisteredInputPlugin($type)
+    {
+        return array_get($this->inputPluginsRegistry, $type);
     }
 }

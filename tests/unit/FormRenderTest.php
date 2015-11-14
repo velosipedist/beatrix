@@ -121,6 +121,49 @@ class FormRenderTest extends \PHPUnit_Framework_TestCase
         // non-indexed choices
         $output = $form->select('foo', array('Alpha', 'Beta'));
         $this->assertHtmlMatches($output, 'select[name="foo"] > option[value="0"]');
+
+        $output = $form->select(
+            'foo',
+            array('a' => 'Alpha', 'b' => 'Beta', array('label' => 'Gamma', 'value' => 'gamma-value'))
+        );
+        $this->assertHtmlMatches($output, 'select[name="foo"] > option[value="a"]');
+        $this->assertHtmlMatches($output, 'option[value="a"] + option[value="b"] + option[value="gamma-value"]');
+
+        $output = $form->select('foo', array(
+            array('label' => 'Alpha', 'value' => 'a'),
+            'b' => array('label' => 'Beta'), // if arry config passed, array index will NOT be used as value
+            array('label' => 'Gamma', 'value' => 'gamma-value', 'data-foo' => 'bar')
+        ));
+        $this->assertContains('Alpha</option>', $output);
+        $this->assertContains('Beta</option>', $output);
+        $this->assertContains('Gamma</option>', $output);
+        $this->assertHtmlMatches(
+            $output,
+            'option[value="a"] + option[value="Beta"] + option[value="gamma-value"][data-foo="bar"]'
+        );
+
+
+        $output = $form->select('foo', array(
+            array('label' => 'Alpha', 'value' => 'a'),
+            'Group' => array(
+                'A1', // Group item may be just string (as value and label)
+                array('label' => 'The A2', 'value' => 'a2_value') // or option config like plain option
+            ),
+            'beta' => array('label' => 'Beta'),
+            array('label' => 'Gamma', 'value' => 'gamma-value', 'data-foo' => 'bar')
+        ));
+        $this->assertHtmlMatches($output, 'select > option[value="a"][selected] + optgroup');
+        $this->assertHtmlMatches($output, 'select > optgroup > option[value="A1"]');
+        $this->assertHtmlMatches($output, 'select > optgroup > option[value="a2_value"]');
+        $output = $form->select('foo', array(
+            array(
+                'a',
+                array('label' => 'The A2')
+            ),
+        ));
+        $this->assertHtmlMatches($output, 'select > optgroup > option[value="a"][selected]');
+        $this->assertHtmlMatches($output, 'select > optgroup > option[value="The A2"]');
+
     }
 
     public function testValidators()

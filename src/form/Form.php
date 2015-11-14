@@ -1,6 +1,7 @@
 <?php
 namespace beatrix\form;
 
+use beatrix\form\validation\BitrixCaptcha;
 use Sirius\Validation\Validator;
 use Sirius\Validation\ValueValidator;
 
@@ -56,6 +57,9 @@ class Form implements \ArrayAccess
         );
         foreach ($rules as $sel => $rule) {
             $this->validator->add($sel, $rule);
+        }
+        if (array_get($options, 'enableCaptcha')) {
+            $this->validator->add(BitrixCaptcha::CHALLENGE_TEXT_INPUT_NAME, '\beatrix\form\validation\BitrixCaptcha');
         }
 
         $this->sanitizeRules = array_merge(
