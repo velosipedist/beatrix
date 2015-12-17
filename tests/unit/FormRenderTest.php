@@ -147,14 +147,15 @@ class FormRenderTest extends \PHPUnit_Framework_TestCase
             array('label' => 'Alpha', 'value' => 'a'),
             'Group' => array(
                 'A1', // Group item may be just string (as value and label)
-                array('label' => 'The A2', 'value' => 'a2_value') // or option config like plain option
+                array('label' => 'The A2', 'value' => 'a2_value', 'data-bar' => 'foo')
+                // or option config like plain option
             ),
             'beta' => array('label' => 'Beta'),
             array('label' => 'Gamma', 'value' => 'gamma-value', 'data-foo' => 'bar')
         ));
         $this->assertHtmlMatches($output, 'select > option[value="a"][selected] + optgroup');
         $this->assertHtmlMatches($output, 'select > optgroup > option[value="A1"]');
-        $this->assertHtmlMatches($output, 'select > optgroup > option[value="a2_value"]');
+        $this->assertHtmlMatches($output, 'select > optgroup > option[value="a2_value"][data-bar="foo"]');
         $output = $form->select('foo', array(
             array(
                 'a',

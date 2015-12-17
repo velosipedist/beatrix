@@ -296,11 +296,13 @@ class FormRenderer
         foreach ($options as $option) {
             if (is_string($option)) {
                 $value = $optionLabel = $option;
+                $attributes = array();
             } else {
-                $optionLabel = $option['label'];
+                $optionLabel = array_pull($option, 'label');
                 $value = array_pull($option, 'value', $optionLabel);
+                $attributes = $option;
             }
-            $html[] = $this->option($optionLabel, $value, $selected);
+            $html[] = $this->option($optionLabel, $value, $selected, $attributes);
         }
 
         return '<optgroup label="' . e($groupLabel) . '">' . implode("\r\n", $html) . '</optgroup>';
