@@ -16,8 +16,12 @@ class MenuTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        class_alias(CIBlock::_cl(), 'CIBlock');
-        class_alias(CModule::_cl(), 'CModule');
+        if (!class_exists('CIBlock')) {
+            class_alias(CIBlock::_cl(), 'CIBlock');
+            class_alias(CModule::_cl(), 'CModule');
+            class_alias(CIBlockSection::_cl(), 'CIBlockSection');
+            class_alias(CPageOption::_cl(), 'CPageOption');
+        }
         $ibMockResult = Mockery::mock('resultMock');
         $ibMockResult->shouldReceive('GetNext')
             ->andReturn(
@@ -38,8 +42,7 @@ class MenuTest extends \PHPUnit_Framework_TestCase
             'SelectedRowsCount' => 1,
         ));
         \beatrix\tests\mock\CIBlockSection::returnList($ibsMockResult);
-        class_alias(CIBlockSection::_cl(), 'CIBlockSection');
-        class_alias(CPageOption::_cl(), 'CPageOption');
+
         $this->menu = new IblockSectionsMenu('foo');
     }
 
@@ -61,6 +64,7 @@ class MenuTest extends \PHPUnit_Framework_TestCase
 |-0 Array
 | |-DEPTH_LEVEL 1
 | |-NAME Level1-1
+| |-#has-active-child 0
 | \-#children Array
 |   \-0 Array
 |     |-DEPTH_LEVEL 2
@@ -68,6 +72,7 @@ class MenuTest extends \PHPUnit_Framework_TestCase
 |-1 Array
 | |-DEPTH_LEVEL 1
 | |-NAME Level1-2
+| |-#has-active-child 0
 | \-#children Array
 |   |-0 Array
 |   | |-DEPTH_LEVEL 2
@@ -75,6 +80,7 @@ class MenuTest extends \PHPUnit_Framework_TestCase
 |   \-1 Array
 |     |-DEPTH_LEVEL 2
 |     |-NAME Level2-3
+|     |-#has-active-child 0
 |     \-#children Array
 |       |-0 Array
 |       | |-DEPTH_LEVEL 3
@@ -90,16 +96,21 @@ class MenuTest extends \PHPUnit_Framework_TestCase
   \-NAME Level1-3
 TREE;
         $tree = $this->menu->getTree($items)->getTreeArray();
-        $it = new \RecursiveTreeIterator(new \RecursiveArrayIterator($tree), \RecursiveTreeIterator::BYPASS_CURRENT,
-            null);
+        $it = new \RecursiveTreeIterator(
+            new \RecursiveArrayIterator($tree),
+            \RecursiveTreeIterator::BYPASS_CURRENT,
+            null
+        );
         $treeDebug = '';
         foreach ($it as $k => $line) {
+            if (is_bool($line)) {
+                $line = (int)$line;
+            }
             $line = "$k {$line}" . PHP_EOL;
             $treeDebug .= $line;
             print $line;
         }
         $this->assertEquals($expect, rtrim($treeDebug), 'Tree must be built correctly');
-
     }
 
     public function testBuildTreeWithCallback()
