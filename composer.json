@@ -3,7 +3,9 @@
   "description": "Bitrix after plastic surgery",
   "keywords": [
     "bitrix",
-    "CMS"
+    "CMS",
+    "templating",
+    "routing"
   ],
   "license": "MIT",
   "authors": [
@@ -14,16 +16,16 @@
     }
   ],
   "require": {
-    "php": ">=5.3.0",
+    "php": ">=5.4.0",
     "slim/slim": "2.*",
-    "illuminate/support": "4.1.*",
-    "symfony/console": "2.4.*",
-    "league/plates": "3.*",
+    "illuminate/support": "4.2.*",
+    "symfony/console": "2.5.*",
+    "league/plates": "3.1.*",
     "league/url": "3.*",
-    "symfony/finder": "2.*",
-    "intervention/image": "2.*",
+    "intervention/image": "2.2.*",
     "siriusphp/validation": "1.*",
-    "suin/php-rss-writer": "1.*"
+    "suin/php-rss-writer": "1.2.*",
+    "philo/laravel-blade": "2.*"
   },
   "require-dev": {
     "mockery/mockery": "0.9.*"
@@ -34,7 +36,6 @@
       "beatrix\\tests\\": "tests"
     },
     "files": [
-      "src/Beatrix.php",
       "src/functions.php"
     ]
   }
