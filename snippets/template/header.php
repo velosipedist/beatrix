@@ -1,9 +1,9 @@
 <?
 // capture anything printed on site before template rendering
-Beatrix::templateHeader();
+beatrix\template_header();
 
 // if you want to automate sections depending on addresses
-Beatrix::layout()->sectionsDefaults([
+beatrix\widgets()->sectionsDefaults([
     // empty default sections
     '/' => [
         'sidebar.left.top' => '',

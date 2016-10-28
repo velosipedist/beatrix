@@ -1,6 +1,7 @@
 <?php
-namespace beatrix\iblock;
+namespace beatrix\helpers;
 use beatrix\db\ResultIterator;
+use beatrix\iblock\Query;
 use CIBlockSection;
 use League\Url\Url;
 
@@ -48,7 +49,7 @@ class NavigationHelper {
 
 	public static function extractSectionChain($sectionId) {
 		if(!isset(self::$extractedItemChains[$sectionId])){
-			$result = CIBlockSection::GetNavChain(0, $sectionId);
+            $result = \CIBlockSection::GetNavChain(0, $sectionId);
 			$chain = ResultIterator::from($result)->toArray();
 			self::$extractedItemChains[$sectionId] = $chain;
 		}
