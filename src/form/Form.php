@@ -42,6 +42,8 @@ class Form implements \ArrayAccess{
 
     /**
      * @param array $data
+     *
+     * @return bool
      */
     public function validate(array $data)
     {
@@ -52,6 +54,8 @@ class Form implements \ArrayAccess{
 
     /**
      * @param array $data
+     *
+     * @return array
      */
     protected function sanitize(array $data)
     {
