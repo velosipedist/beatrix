@@ -102,15 +102,19 @@ Then inside index.php (leave Bitrix file header & footer)
 
 ```php
 // news/index.php with .htaccess in same dir:
-Beatrix::app()->get('/', function(){
+beatrix\get('/', function(){
   /* news list */
   Beatrix::app()->render('blade/template', ['var' => $val]);
 });
-Beatrix::app()->get('/:category+', function($category){/* news list inside category, optionally nested*/});
-Beatrix::app()->get('/:category+/:id', function($category, $id){/* news detail */});
+beatrix\get('/:category+', function($category){/* news list inside category, optionally nested*/});
+beatrix\post('/:category+/:id', function($category, $id){/* handle _POST data */});
+beatrix\group('/root/:var', function($var){
+    // nested routing
+    beatrix\get('/all', function() use ($var){
+        // var also available
+    })
+});
 
-// in the end of page, start listening http requests captured with .htaccess
-Beatrix::app()->run();
 ```
 
 All routing features (get/post/etc, grouping, regexp in conditions) available in [docs](http://docs.slimframework.com/#Routing-Overview).
