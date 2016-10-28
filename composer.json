@@ -14,10 +14,10 @@
     }
   ],
   "require": {
-    "php": ">=5.3.0",
+    "php": ">=5.4.0",
     "slim/slim": "2.*",
-    "illuminate/support": "4.1.*",
-    "symfony/console": "2.4.*",
+    "illuminate/support": "4.2.*",
+    "symfony/console": "2.*",
     "league/plates": "3.*",
     "league/url": "3.*",
     "symfony/finder": "2.*",
