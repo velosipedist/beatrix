@@ -1,7 +1,81 @@
 <?php
-function slim_url($name, $params = array(), $queryParams = array())
+namespace beatrix;
+
+/**
+ * Must be invoked at app start, i.e. in init.php, before the rendering occurs
+ *
+ * @param array $settings
+ *
+ * @return Application
+ * @see Slim::__construct()
+ */
+function boot($settings = array())
 {
-    return Beatrix::app()->urlFor($name, $params, $queryParams);
+    if (defined('ADMIN_SECTION') && ADMIN_SECTION) {
+        // if admin section - separate process
+        return;
+    }
+    new Application($settings);
+}
+
+/**
+ * @param string $name
+ * @param array  $aReplace
+ *
+ * @return string
+ */
+function _($name, $aReplace = null)
+{
+    return \GetMessage($name, $aReplace);
+}
+
+/**
+ * @return Application
+ * @throws \BadMethodCallException
+ */
+function app()
+{
+    $app = Application::getInstance();
+    if (!$app) {
+        throw new \BadMethodCallException("Setup Beatrix first, using beatrix\\boot()");
+    }
+    return $app;
+}
+
+/**
+ * @return \Slim\Route
+ */
+function get()
+{
+    return call_user_func_array([app(), 'get'], func_get_args());
+}
+
+/**
+ * @return \Slim\Route
+ */
+function post()
+{
+    return call_user_func_array([app(), 'post'], func_get_args());
+}
+
+/**
+ * @return void
+ */
+function group()
+{
+    call_user_func_array([app(), 'group'], func_get_args());
+}
+
+/**
+ * @param string $name        Slim route name
+ * @param array  $params      Slim route params
+ * @param array  $queryParams rest of params to be appended after ?
+ *
+ * @return string
+ */
+function url($name, $params = array(), $queryParams = array())
+{
+    return app()->urlFor($name, $params, $queryParams);
 }
 
 
@@ -9,13 +83,14 @@ function slim_url($name, $params = array(), $queryParams = array())
  * Render {@link http://laravel.com/docs/templates Blade} template located in /inc/blade
  *
  * @param string $view
- * @param array $data
- * @param bool $return Whether to return rendering result
- * @internal param array $mergeData
+ * @param array  $data   variables to be passed
+ * @param bool   $return Whether to return rendering result or print immediately
+ *
+ * @return \Illuminate\View\View
  */
-function view($view, $data = array(), $return = false)
+function render($view, $data = array(), $return = false)
 {
-    $view = Beatrix::view()->render($view, $data);
+    $view = blade()->make($view, $data);
     if ($return) {
         return $view;
     } else {
@@ -25,10 +100,10 @@ function view($view, $data = array(), $return = false)
 
 function is_ajax()
 {
-    return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
+    return app()->request->isAjax();
 }
 
-function dateRange($from, $to, $sep = ' ')
+function date_range($from, $to, $sep = ' ')
 {
     $ret = $from;
     if (!$from && $to) {
@@ -45,7 +120,7 @@ function thumb($fileId, $width, $height = null, $method = BX_RESIZE_IMAGE_PROPOR
 {
     $height = $height ? $height : $width;
     $arSize = compact('width', 'height');
-    $data = CFile::ResizeImageGet($fileId, $arSize, $method);
+    $data = \CFile::ResizeImageGet($fileId, $arSize, $method);
     return $data['src'];
 }
 
@@ -55,7 +130,7 @@ function crop($fileId, $size, $height = null, $pattern = '{dirname}/{basename}_c
     \Intervention\Image\ImageManagerStatic::configure(array(
         'driver' => extension_loaded('imagick') ? 'imagick' : 'gd'
     ));
-    $webPath = CFile::GetPath($fileId);
+    $webPath = \CFile::GetPath($fileId);
     $webParts = pathinfo($webPath);
     $thumbUrl = strtr($pattern, array(
         '{dirname}' => $webParts['dirname'],
@@ -78,48 +153,71 @@ function crop($fileId, $size, $height = null, $pattern = '{dirname}/{basename}_c
  * Real URL path
  * @return mixed
  */
-function getNavPath()
+function current_path()
 {
-    return '/' . trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/') . '/';
+    return '/' . trim((string)\beatrix\helpers\NavigationHelper::currentUrl()->getPath(), '/') . '/';
 }
 
-/**
- * Gets current or passed path, exploded to array
- * @param boolean $path
- * @return array Path parts as ['/root/', '/root/child/', '/root/child/current/']
- */
-function getPathChain($path = '')
-{
-    $path = $path ? $path : getNavPath();
-    $parts = explode('/', trim($path, '/'));
-    $ret = array();
-    foreach ($parts as $i => $part) {
-        $piece = array_slice($parts, 0, $i + 1);
-        $ret[] = '/' . implode('/', $piece) . '/';
-    }
-    return $ret;
-}
 
 /**
  * Breadcrumbs generated as `[['LINK'=>'/path/', 'TITLE'=>'MenuTitle'], ...]`
  * @param bool $path
  * @return array
  */
-function getNavChain($path = false)
+function breadcrumbs($path = false)
 {
-    /** @var CMain $app */
+    static $chainsCache;
+    if (is_null($chainsCache)) {
+        $chainsCache = [];
+    }
+    /** @var \CMain $app */
     $app = $GLOBALS['APPLICATION'];
-    $chainTemplatePath = CSite::GetSiteDocRoot(SITE_ID) . BX_PERSONAL_ROOT . '/templates/.default/chain_template.php';
-    if (!file_exists(BX_PERSONAL_ROOT . "/templates/.default/chain_template.php")) {
+    $chainTemplatePath = \CSite::GetSiteDocRoot(SITE_ID) . BX_PERSONAL_ROOT . '/templates/.default/chain_template.php';
+    if (!file_exists($chainTemplatePath)) {
         file_put_contents($chainTemplatePath, '<? return $arResult;');
     }
     if ($path) {
-        $chainIndex = $path;
-        if (!$app->navChains[$chainIndex]) {
-            $app->navChains[$chainIndex] = $app->GetNavChain($path, false, false, true);
+        if (!isset($chainsCache[$path])) {
+            $chainsCache[$path] = $app->GetNavChain($path, false, false, true);
         }
-        return $app->navChains[$chainIndex];
+        return $chainsCache[$path];
     } else {
         return $app->GetNavChain(false, 0, false, true);
     }
+}
+
+/**
+ * Call it once anywhere at bitrix/templates/your-template-id/header.php
+ */
+function template_header()
+{
+    ob_start();
+}
+
+/**
+ * Call it once at end of bitrix/templates/your-template-id/footer.php
+ */
+function template_footer()
+{
+    if (is_ajax()) {
+        print ob_get_clean();
+    } else {
+        app()->activeTemplate->getFactory()->startSection('content', ob_get_clean());
+        print app()->activeTemplate->render();
+    }
+}
+
+function widgets()
+{
+    return app()->widgets;
+}
+
+function blade()
+{
+    return app()->view->getBladeEngine();
+}
+
+function is_admin()
+{
+    return isset($GLOBALS['USER']) && $GLOBALS['USER']->IsAdmin();
 }

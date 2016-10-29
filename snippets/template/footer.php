@@ -1,3 +1,3 @@
 <?
 // Just
-Beatrix::templateFooter();
+beatrix\template_footer();
