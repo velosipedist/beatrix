@@ -141,7 +141,8 @@ class Query
     {
         $this->filter = (array)$this->filter;
         foreach ($filter as $propName => $val) {
-            $this->filter['PROPERTY_' . $propName . '_VALUE'] = $val;
+            list($prefix, $code) = static::extractFilterPrefix($propName);
+            $this->filter[$prefix . 'PROPERTY_' . $code . '_VALUE'] = $val;
         }
         return $this;
     }
@@ -155,7 +156,8 @@ class Query
     {
         //todo move into propertyFilter() with metadata checks
         foreach ($filter as $propertyCode => $values) {
-            $enumChoices = Metadata::getIblockEnumChoices($this->iblockCode, $propertyCode);
+            list($prefix, $code) = static::extractFilterPrefix($propertyCode);
+            $enumChoices = Metadata::getIblockEnumChoices($this->iblockCode, $code);
             if (!is_array($values)) {
                 $choiceIds = $enumChoices[$values];
             } else {
@@ -165,7 +167,7 @@ class Query
                 }
             }
             //todo respect prefixing logic like !, <>, etc
-            $this->filter['PROPERTY_' . $propertyCode] = $choiceIds;
+            $this->filter[$prefix . 'PROPERTY_' . $code] = $choiceIds;
         }
         return $this;
     }
@@ -263,9 +265,11 @@ class Query
 
     /**
      * Execute query and return elements db result
-     * @param int|null $pageSize
-     * @param int|null $pageNumber
-     * @return ResultIterator
+     *
+*@param int|null $pageSize
+     * @param string|null $pageParam
+     *
+*@return ResultIterator
      */
     public function getElements($pageSize = null, $pageParam = null)
     {
@@ -429,5 +433,11 @@ class Query
     public function getIsPropertiesQueried()
     {
         return $this->isPropertiesQueried;
+    }
+
+    public static function extractFilterPrefix($propertyCode)
+    {
+        preg_match('/^([^A-Z0-9_]*)([A-Z0-9_].+)/i', $propertyCode, $matches);
+        return array($matches[1], $matches[2]);
     }
 }
