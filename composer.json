@@ -20,7 +20,6 @@
     "slim/slim": "2.*",
     "illuminate/support": "4.2.*",
     "symfony/console": "2.5.*",
-    "league/plates": "3.1.*",
     "league/url": "3.*",
     "intervention/image": "2.2.*",
     "siriusphp/validation": "1.*",

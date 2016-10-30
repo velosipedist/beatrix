@@ -13,29 +13,19 @@ use Slim\Slim;
  * Base micro HTTP application listening certain folders for common modules routing.
  * Also contains required dependencies for preconfigured libs.
  * @property BladeView      $view
- * @property View           $layout
+ * @property View           $activeTemplate
  * @property WidgetsManager $widgets
  */
 class Application extends Slim
 {
+    /** @var bool Do we have to run router at Bitrix boot end */
     private $hasRoutes = false;
-    private $debug = false;
-    /**
-     * Log into PhpConsole
-     */
-    const DEBUG_NORMAL = 1;
-    /**
-     * To dump and exit immediately
-     */
-    const DEBUG_AGGRESSIVE = 2;
 
     /**
      * {@inheritdoc}
      */
-    public function __construct(array $userSettings = array())
+    public function __construct(array $userSettings = [])
     {
-        $this->setupDebug($userSettings);
-
         parent::__construct($userSettings);
 
         // fix trailing slash url parsing issue
@@ -44,8 +34,6 @@ class Application extends Slim
         $this->view->addNamespace('beatrix', __DIR__ . '/../templates');
         $self = $this;
         $this->error(function (\Exception $e) use ($self) {
-            $this->debug($e, 'exception.slim');
-
             $message = $e->getMessage();
 
             if ($bitrixError = $GLOBALS['APPLICATION']->GetException()) {
@@ -55,7 +43,7 @@ class Application extends Slim
             if ($self->request->isAjax()) {
                 $self->config('debug', false);
                 $self->response->headers['content-type'] = 'application/json';
-                print json_encode(array('message' => $message));
+                print json_encode(['message' => $message]);
             } else {
                 if ($self->config('debug')) {
                     throw new UnhanledException($message, 0, $e);
@@ -67,7 +55,7 @@ class Application extends Slim
         $this->container->singleton('widgets', function () {
             return new WidgetsManager();
         });
-        $this->container->singleton('layout', function () use ($self) {
+        $this->container->singleton('activeTemplate', function () use ($self) {
             return $self->view
                 ->getBladeEngine()
                 ->make(app()->request->isAjax() ? 'beatrix::layout/empty' : SITE_TEMPLATE_ID . '_layout');
@@ -98,6 +86,9 @@ class Application extends Slim
      */
     public static function getDefaultSettings()
     {
+        if (!get_called_class()) {
+            throw new \BadMethodCallException("For internal usage only");
+        }
         $parent = parent::getDefaultSettings();
         $parent['log.enabled'] = false;
         $parent['routes.case_sensitive'] = false;
@@ -142,71 +133,5 @@ class Application extends Slim
     private function updateSettings(array $settings)
     {
         $this->container['settings'] = array_merge($this->container->get('settings'), $settings);
-    }
-
-    /**
-     * @param array $userSettings
-     *
-     * @throws \Exception
-     * @internal param $debug
-     */
-    private function setupDebug(array &$userSettings)
-    {
-        if (!is_admin()) {
-            return;
-        }
-        if (isset($userSettings['debug'])) {
-            $this->debug = $userSettings['debug'];
-            switch ($this->debug) {
-                case true:
-                case static::DEBUG_NORMAL:
-                    if (!class_exists('\PhpConsole\Helper')) {
-                        require VENDORS_LITE . 'PhpConsole/__autoload.php';
-                    }
-                    Helper::register();
-                    break;
-                case static::DEBUG_AGGRESSIVE:
-                    if (!class_exists('\Kint')) {
-                        require VENDORS_LITE . 'Kint/Kint.class.php';
-                    }
-                    break;
-            }
-            unset($userSettings['debug']);
-
-        }
-        if (isset($userSettings['debug_set_error_reporting'])) {
-            $level = $userSettings['debug_set_error_reporting'];
-            switch ($this->debug) {
-                case true:
-                case static::DEBUG_NORMAL:
-                    $chosenLevel =
-                        E_WARNING | E_NOTICE | E_ERROR | E_RECOVERABLE_ERROR | E_COMPILE_ERROR | E_COMPILE_WARNING;
-                    break;
-                case static::DEBUG_AGGRESSIVE:
-                    $chosenLevel = E_ALL;
-                    break;
-            }
-            if (is_int($level)) {
-                $chosenLevel = $level;
-            }
-            //todo make this feature work
-            error_reporting($chosenLevel);
-            ini_set('display_errors', 1);
-            unset($userSettings['debug_set_error_reporting']);
-        }
-
-    }
-
-    public function debug($stuff, $tag = '')
-    {
-        switch ($this->debug) {
-            case true:
-            case static::DEBUG_NORMAL:
-                \PC::debug($stuff, 'beatrix.' . ($tag ?: 'debug'));
-                break;
-            case static::DEBUG_AGGRESSIVE:
-                \Kint::dump($stuff);
-                break;
-        }
     }
 }

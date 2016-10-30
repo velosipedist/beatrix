@@ -1,11 +1,6 @@
 <?php
 namespace beatrix;
 
-use Illuminate\View\View;
-use Slim\Route;
-
-define('VENDORS_LITE', __DIR__ . '/../vendor-lite/');
-
 /**
  * Must be invoked at app start, i.e. in init.php, before the rendering occurs
  *
@@ -14,7 +9,7 @@ define('VENDORS_LITE', __DIR__ . '/../vendor-lite/');
  * @return Application
  * @see Slim::__construct()
  */
-function init($settings = array())
+function boot($settings = array())
 {
     if (defined('ADMIN_SECTION') && ADMIN_SECTION) {
         // if admin section - separate process
@@ -42,13 +37,13 @@ function app()
 {
     $app = Application::getInstance();
     if (!$app) {
-        throw new \BadMethodCallException("Setup Beatrix first, using beatrix\\init()");
+        throw new \BadMethodCallException("Setup Beatrix first, using beatrix\\boot()");
     }
     return $app;
 }
 
 /**
- * @return Route
+ * @return \Slim\Route
  */
 function get()
 {
@@ -56,7 +51,7 @@ function get()
 }
 
 /**
- * @return Route
+ * @return \Slim\Route
  */
 function post()
 {
@@ -91,7 +86,7 @@ function url($name, $params = array(), $queryParams = array())
  * @param array  $data   variables to be passed
  * @param bool   $return Whether to return rendering result or print immediately
  *
- * @return View
+ * @return \Illuminate\View\View
  */
 function render($view, $data = array(), $return = false)
 {
@@ -207,7 +202,8 @@ function template_footer()
     if (is_ajax()) {
         print ob_get_clean();
     } else {
-        print app()->layout->with('content', ob_get_clean());
+        app()->activeTemplate->getFactory()->startSection('content', ob_get_clean());
+        print app()->activeTemplate->render();
     }
 }
 
