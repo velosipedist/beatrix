@@ -1,8 +1,8 @@
 <?php
 namespace beatrix\db;
 
+use beatrix\helpers\NavigationHelper;
 use beatrix\iblock\ElementsResult;
-use beatrix\iblock\NavigationHelper;
 use beatrix\iblock\SectionsResult;
 use Countable;
 use Iterator;
@@ -34,8 +34,8 @@ class ResultIterator implements Iterator, Countable
      * @param \CDBResult | \CSearch | \CIBlockResult | ElementsResult | SectionsResult $result
      * @param int $pageSize Page size for autimatic pagination
      * @param string $pageUrlParam Which $_GET param to use for current page number indication
-     * @param bool $textHtmlAuto
-     * @param bool $useTilda
+     * @param bool                                                                     $textHtmlAuto
+     * @param bool                                                                     $useTilda
      */
     public function __construct($result, $pageSize = null, $pageUrlParam = 'nav_page')
     {
@@ -116,7 +116,7 @@ class ResultIterator implements Iterator, Countable
         $urlStartTemplate = $currentUrl->__toString();
         $result = $this->result;
 
-        return \Beatrix::view()->render(
+        return \beatrix\render(
             $template,
             array_merge($variables, array(
                 'urlTemplate' => $urlTemplate,
